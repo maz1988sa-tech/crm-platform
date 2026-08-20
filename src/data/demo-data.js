@@ -89,11 +89,11 @@
         owner_id: i % 11 === 10 ? null : owner, secondary_owner_id: i % 4 === 0 ? 'u_bdm' : null,
         relationship_strength: rnd.pick(['weak', 'medium', 'medium', 'strong']), strategic_importance: i % 7 === 0 ? 'high' : rnd.pick(['low', 'medium', 'medium']),
         preferred_language: i % 8 === 0 ? 'en' : 'ar',
-        procurement_portal: type === 'government' || type === 'semi_government' ? 'منصة اعتماد' : (rnd.chance(0.3) ? 'بوابة الموردين الخاصة بالعميل' : null),
+        procurement_portal: type === 'government' || type === 'semi_government' ? 'منصة اعتماد' : (rnd.chance(0.3) ? 'بوابة الموردين لدى العميل' : null),
         vendor_registration: type === 'government' || type === 'semi_government' ? rnd.pick(['registered', 'registered', 'in_progress', 'expired']) : 'not_required',
         prequalification: rnd.pick(['not_required', 'qualified', 'qualified', 'in_progress', 'pending']),
         confidentiality: i % 13 === 0 ? 'restricted' : 'internal',
-        notes: i % 5 === 0 ? 'عميل ذو حجم مشاريع متكرر؛ يفضّل التواصل عبر مدير المشاريع.' : '',
+        notes: i % 5 === 0 ? 'عميل ذو مشاريع متكررة؛ يفضّل التواصل عبر مدير المشاريع.' : '',
         tags: i % 4 === 0 ? ['مشاريع متكررة'] : (i % 4 === 1 ? ['رؤية 2030'] : []),
         potential_value: rnd.chance(0.5) ? rnd.int(5, 120) * 1000000 : null,
         known_projects: rnd.chance(0.4) ? 'مشروع توسعة المقر الرئيسي (منجز 2024)؛ برنامج صيانة سنوي' : ''
@@ -161,7 +161,7 @@
         risk_level: rnd.pick(['low', 'medium', 'medium', 'high']), priority: value && value > 50000000 ? 'high' : rnd.pick(['low', 'medium', 'medium', 'high']),
         required_documents: st.order >= 6 ? [{ key: 'cr', received: true }, { key: 'classification', received: true }, { key: 'bid_bond', received: st.order >= 11 }, { key: 'technical', received: st.order >= 11 }, { key: 'commercial', received: st.order >= 11 }] : [],
         loss_reason: stage === 'lost' ? rnd.pick(['price', 'price', 'technical', 'competitor_relationship', 'budget_cancelled', 'late_submission']) : null,
-        lessons_learned: stage === 'lost' ? 'فارق السعر مع الفائز قارب 7٪؛ يلزم مراجعة افتراضات المواد والقوى العاملة.' : null,
+        lessons_learned: stage === 'lost' ? 'فارق السعر مع الفائز بلغ نحو 7%؛ يلزم مراجعة افتراضات المواد والقوى العاملة.' : null,
         notes: rnd.chance(0.3) ? 'الفرصة مرتبطة ببرنامج توسعة متعدد المراحل.' : '',
         expected_start_date: st.order >= 8 ? dayAhead(rnd.int(30, 240)) : null, expected_duration_months: st.order >= 8 ? rnd.pick([6, 9, 12, 18, 24, 36]) : null,
         payment_terms: st.order >= 8 ? rnd.pick(['monthly_ipc', 'advance_ipc', 'milestones']) : null, retention_pct: st.order >= 8 ? 10 : null, warranty_months: st.order >= 8 ? 12 : null,
@@ -282,7 +282,7 @@
         var type = rnd.pick(actTypes);
         var act = Object.assign(MODEL.defaults('activity', opp.owner_id || 'u_bd1'), {
           id: nid('ACT'), customer_id: opp.customer_id, contact_id: cts.length ? rnd.pick(cts).id : null, opportunity_id: opp.id, type: type,
-          at: past ? dtAgo(daysBack) : dtAhead(-daysBack), owner_id: opp.owner_id || BD[oi % 3], participants: rnd.chance(0.5) ? 'فريق تطوير الأعمال + ممثل العميل' : '',
+          at: past ? dtAgo(daysBack) : dtAhead(-daysBack), owner_id: opp.owner_id || BD[oi % 3], participants: rnd.chance(0.5) ? 'فريق تطوير الأعمال وممثل العميل' : '',
           purpose: rnd.pick(PURPOSES), outcome: status === 'done' ? rnd.pick(OUTCOMES) : '', notes: '', next_action: rnd.chance(0.6) ? rnd.pick(NEXT_ACTIONS) : '',
           due_date: status === 'planned' ? (past ? dayAgo(daysBack) : dayAhead(-daysBack)) : null, status: status, priority: rnd.pick(['low', 'medium', 'medium', 'high', 'critical']),
           completed_at: status === 'done' ? dtAgo(daysBack) : null
@@ -326,7 +326,7 @@
     db.customers.slice(0, 6).forEach(function (c, i) { db.documents.push({ id: U.uid('doc'), entity_type: 'customer', entity_id: c.id, name: 'ملف التعريف بالشركة (مرسَل).pdf', doc_type: 'profile', storage_ref: 'DMS-CUS-' + (2000 + i), classification: 'internal', uploaded_by: c.owner_id || 'u_bd1', uploaded_at: dtAgo(30 + i), demo: true, origin: 'demo' }); });
 
     /* ---- عروض محفوظة ---- */
-    db.saved_views.push({ id: U.uid('sv'), user_id: 'u_bd1', module: 'opportunities', name: 'فرصي العالقة', filters: { owner_id: 'u_bd1', flags: 'stuck' }, demo: true });
+    db.saved_views.push({ id: U.uid('sv'), user_id: 'u_bd1', module: 'opportunities', name: 'فرصي المتوقفة', filters: { owner_id: 'u_bd1', flags: 'stuck' }, demo: true });
     db.saved_views.push({ id: U.uid('sv'), user_id: 'u_bdm', module: 'customers', name: 'عملاء الرياض الاستراتيجيون', filters: { region: 'riyadh', classification: 'A' }, demo: true });
 
     return db;

@@ -18,18 +18,24 @@
     var th = CFG.theme || {}; var r = document.documentElement.style;
     if (th.primary) r.setProperty('--ink', th.primary); if (th.primary2) r.setProperty('--ink2', th.primary2);
     if (th.accent) r.setProperty('--accent', th.accent); if (th.accentSoft) r.setProperty('--accent-soft', th.accentSoft);
-    document.title = S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar;
+    document.title = (S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar) + ' — ' + (S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar);
   }
 
   /* ---------- شاشة الدخول ---------- */
   function renderLogin(rootEl, err) {
     D.clear(rootEl);
     var demoMode = S.mode === 'local';
-    var lmark = h('span', { class: 'mark', 'aria-hidden': 'true' }); lmark.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg>';
-    var side = h('div', { class: 'side' }, h('div', { class: 'brand' }, lmark, h('div', { class: 'titles' }, h('span', { class: 'name', style: { color: '#fff' } }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar))),
-      h('h1', null, S.lang === 'en' ? 'One reliable view of customers, opportunities and contracts.' : 'نظرة واحدة موثوقة على العملاء والفرص والعقود.'),
-      h('p', null, S.lang === 'en' ? 'From first contact to award, loss or closure — with clear next actions, deadlines and a full audit trail.' : 'من أول تواصل حتى الترسية أو الخسارة أو الإقفال — بإجراءات تالية واضحة ومواعيد مضبوطة وسجل تدقيق كامل.'),
-      h('ul', null, h('li', null, S.lang === 'en' ? 'Customers, contacts and relationship ownership' : 'العملاء وجهات الاتصال ومسؤولية العلاقة'), h('li', null, S.lang === 'en' ? 'Pipeline with configurable stages and history' : 'مسار فرص بمراحل قابلة للتهيئة وسجل كامل'), h('li', null, S.lang === 'en' ? 'Proposals, approvals, contracts and handover' : 'العروض والاعتمادات والعقود والتسليم'), h('li', null, S.lang === 'en' ? 'Role-based access enforced on the backend' : 'صلاحيات حسب الدور تُفرض على الخادم')),
+    var lmark = UI.brandMark(46, 'on-dark');
+    var side = h('div', { class: 'side' }, h('div', { class: 'brand lg' }, lmark, h('div', { class: 'titles' },
+        h('span', { class: 'name', style: { color: '#fff' } }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar),
+        h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar))),
+      h('h1', null, S.lang === 'en' ? 'Ihraz drives every opportunity to a decision.' : 'إحراز يقود كل فرصة إلى قرار.'),
+      h('p', null, S.lang === 'en' ? 'From first contact to award, loss or closure — with a clear next action, a firm date, and a full audit trail of every change.' : 'من أول تواصل حتى الترسية أو الخسارة أو الإقفال — بإجراء تالٍ واضح، وموعد مضبوط، وسجل تدقيق كامل لكل تغيير.'),
+      h('ul', null,
+        h('li', null, S.lang === 'en' ? 'Customers, contacts and the relationship owner in one record' : 'العملاء وجهات الاتصال ومسؤول العلاقة في سجل واحد'),
+        h('li', null, S.lang === 'en' ? 'An opportunity pipeline with configurable stages and full history' : 'مسار فرص بمراحل قابلة للتهيئة وسجل تحرّك كامل'),
+        h('li', null, S.lang === 'en' ? 'Proposals, approvals, contracts and handover to delivery' : 'العروض والاعتمادات والعقود والتسليم لفريق التنفيذ'),
+        h('li', null, S.lang === 'en' ? 'Role-based access enforced on the server, not in the interface' : 'صلاحيات حسب الدور تُفرض على الخادم لا على الواجهة')),
       h('p', { class: 'small', style: { marginTop: 'auto', opacity: .7 } }, (S.lang === 'en' ? CFG.platform.classification_en : CFG.platform.classification_ar) + ' · v' + CFG.platform.version));
     var pane = h('div', { class: 'pane' });
     var top = h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } }, h('h2', { style: { flex: 1 } }, demoMode ? t('login.demo_title') : t('login.title')), h('button', { class: 'langbtn', type: 'button', on: { click: function () { S.setLang(S.lang === 'ar' ? 'en' : 'ar'); renderLogin(rootEl); } } }, t('app.lang_toggle')));
@@ -61,7 +67,7 @@
     var app = h('div', { class: 'app' });
     app.appendChild(h('a', { class: 'skip-link', href: '#main' }, t('app.nav_skip')));
     /* الشريط العلوي */
-    var mark = h('span', { class: 'mark', 'aria-hidden': 'true' }); mark.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg>';
+    var mark = UI.brandMark(24, 'on-dark');
     var brand = h('a', { class: 'brand', href: '#/overview' }, mark, h('span', { class: 'titles' }, h('span', { class: 'name' }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar), h('span', { class: 'company' }, S.lang === 'en' ? CFG.platform.company_en : CFG.platform.company_ar)));
     var gs = buildGlobalSearch();
     var alertsBtn = h('button', { class: 'iconbtn', type: 'button', title: t('app.alerts'), 'aria-label': t('app.alerts'), on: { click: openAlerts } }, UI.icon('bell'));

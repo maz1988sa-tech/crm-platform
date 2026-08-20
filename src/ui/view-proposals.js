@@ -50,7 +50,7 @@
     main.appendChild(kp);
     var users = S.live('users').filter(function (u) { return ['proposal_manager', 'bd_employee', 'bd_manager', 'commercial_reviewer', 'system_admin'].indexOf(u.role) >= 0; }).map(function (u) { return { value: u.id, label: S.userName(u.id) }; });
     var bar = UI.filters({ values: f, items: [
-      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('pr.number') + ' / ' + t('app.opportunity') + ' / ' + t('app.customer') },
+      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('pr.number') + ' · ' + t('app.opportunity') + ' · ' + t('app.customer') },
       { key: 'status', type: 'select', label: t('pr.filter_status'), lookup: 'proposal_statuses' },
       { key: 'owner_id', type: 'select', label: t('pr.filter_owner'), options: users },
       { key: 'deadline', type: 'select', label: t('pr.filter_deadline'), options: [{ value: 'overdue', label: t('pr.overdue') }, { value: 'week', label: t('pr.kpi_due_week') }, { value: 'action', label: t('pr.needs_action') }] }
@@ -91,7 +91,7 @@
     if (canManage && isLatest && ['in_preparation', 'technical_review', 'commercial_review', 'ready', 'revision_requested', 'not_started', 'awaiting_info'].indexOf(p.status) >= 0 && p.approval_status !== 'approved') acts.appendChild(h('button', { class: 'btn accent', type: 'button', on: { click: function () { S.adapter.requestProposalApproval(p.id, p.version_no).then(function (r) { return root.APP.rerender().then(function () { UI.toast(r.approvals.length ? t('app.approval_sent') : t('app.saved'), 'ok'); }); }).catch(UI.errorToast); } } }, t('pr.request_approval')));
     if (canSubmit && isLatest && ['ready', 'revision_requested', 'in_preparation', 'technical_review', 'commercial_review', 'awaiting_approval'].indexOf(p.status) >= 0) acts.appendChild(h('button', { class: 'btn primary', type: 'button', on: { click: function () { submitFlow(p); } } }, t('pr.submit')));
     head.appendChild(acts); main.appendChild(head);
-    if (!isLatest) main.appendChild(UI.infoBox((S.lang === 'en' ? 'You are viewing an older version. Latest: ' : 'تعرض نسخة قديمة. الأحدث: ') + 'v' + versions[0].version_no));
+    if (!isLatest) main.appendChild(UI.infoBox((S.lang === 'en' ? 'You are viewing an older version. Latest: ' : 'أنت تعرض نسخة سابقة. الأحدث: ') + 'v' + versions[0].version_no));
     if (pendingApprovals.length) main.appendChild(UI.warnBox(t('app.needs_approval_by', { roles: U.uniq(pendingApprovals.map(function (a) { return PERMS.approverRoles(a.type).map(S.roleLabel).join('/') + ' (' + S.label('approval_types', a.type) + ')'; })).join('، ') })));
     var hv = RULES.approvals.proposal_high_value.enabled && canCom && (U.num(p.proposed_value) || 0) >= RULES.approvals.proposal_high_value.threshold;
     var disc = RULES.approvals.discount.enabled && canCom && (U.num(p.discount_pct) || 0) > RULES.approvals.discount.threshold_pct;

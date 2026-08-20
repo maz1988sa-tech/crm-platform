@@ -15,10 +15,12 @@
   root.APP_CONFIG = {
     /* اسم المنصة — يُغيَّر هنا فقط وينعكس في كل الشاشات والعناوين */
     platform: {
-      name_ar: 'منصة إدارة العملاء والفرص',
-      name_en: 'Customer & Opportunity Management Platform',
-      short_ar: 'العملاء والفرص',
-      short_en: 'CRM',
+      name_ar: 'إحراز',
+      name_en: 'Ihraz',
+      tagline_ar: 'من الفرصة إلى الإنجاز',
+      tagline_en: 'From opportunity to achievement',
+      short_ar: 'إحراز',
+      short_en: 'Ihraz',
       company_ar: ENV.company_ar || 'شركة المقاولات',      // اسم الشركة (اختياري، يظهر بجانب الشعار)
       company_en: ENV.company_en || 'Contracting Co.',
       version: '1.0.0',

@@ -19,7 +19,7 @@
     { key: 'new_year',           ar: 'رأس السنة الميلادية', en: 'New Year',            type: 'calendar',  date: { type: 'gregorian', month: 1, day: 1 },  enabled: false, policy_gated: true, prep_days: 5 },
     { key: 'contract_award',     ar: 'ترسية عقد',          en: 'Contract award',       type: 'event',     date: { type: 'event' }, enabled: true },
     { key: 'project_completion', ar: 'إنجاز مشروع',        en: 'Project completion',   type: 'event',     date: { type: 'event' }, enabled: true },
-    { key: 'customer_milestone', ar: 'إنجاز/مناسبة للعميل', en: 'Customer milestone',  type: 'event',     date: { type: 'event' }, enabled: true },
+    { key: 'customer_milestone', ar: 'إنجاز أو مناسبة للعميل', en: 'Customer milestone',  type: 'event',     date: { type: 'event' }, enabled: true },
     { key: 'other',              ar: 'مناسبة أخرى معتمدة',  en: 'Other approved occasion', type: 'event', date: { type: 'event' }, enabled: true }
   ];
 

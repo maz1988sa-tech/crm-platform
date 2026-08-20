@@ -56,7 +56,7 @@
     var users = S.live('users').filter(function (u) { return ['bd_employee', 'bd_manager', 'system_admin', 'proposal_manager'].indexOf(u.role) >= 0; }).map(function (u) { return { value: u.id, label: S.userName(u.id) }; });
     var qualityOpts = [{ value: 'any', label: t('cu.quality_issues') }].concat(['missing_contact_details', 'no_owner', 'no_contacts', 'needs_follow_up', 'overdue_follow_up'].map(function (k) { return { value: k, label: ENGINE.customerFlagLabel(k, S.lang) }; }));
     var bar = UI.filters({ values: f, items: [
-      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('cu.name_ar') + ' / ' + t('cu.cr') + ' / ' + t('cu.email') },
+      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('cu.name_ar') + ' · ' + t('cu.cr') + ' · ' + t('cu.email') },
       { key: 'status', type: 'select', label: t('cu.filter_status'), lookup: 'customer_statuses' },
       { key: 'customer_type', type: 'select', label: t('cu.filter_type'), lookup: 'customer_types' },
       { key: 'region', type: 'select', label: t('cu.filter_region'), lookup: 'regions' },
@@ -170,9 +170,9 @@
           { key: 'next', label: t('app.next_action'), width: 2, get: function (o) { return o.next_action ? h('span', null, o.next_action, h('span', { class: 'sub' }, o.next_action_due ? S.date(o.next_action_due) : '')) : h('span', { class: 'chip warn sm' }, t('app.no_next_action')); } },
           { key: 'prop', label: t('op.proposal_status'), width: 1.3, get: function (o) { var p = S.latestProposal(o.id); return p ? UI.lookupChip('proposal_statuses', p.status, 'sm') : h('span', { class: 'muted' }, t('op.no_proposal')); } }
         ];
-        var groups = [[t('cu.stats_active'), active], [t('cu.stats_won'), won], [t('cu.stats_lost') + ' / ' + S.label('outcomes', 'on_hold') + ' / ' + S.label('outcomes', 'cancelled'), opps.filter(function (o) { return !STAGES.isActive(o.stage) && !STAGES.isWon(o.stage); })]];
+        var groups = [[t('cu.stats_active'), active], [t('cu.stats_won'), won], [t('cu.stats_lost') + ' · ' + S.label('outcomes', 'on_hold') + ' · ' + S.label('outcomes', 'cancelled'), opps.filter(function (o) { return !STAGES.isActive(o.stage) && !STAGES.isWon(o.stage); })]];
         groups.forEach(function (g) { pane.appendChild(UI.card({ title: g[0], sub: g[1].length + ' ' + (S.lang === 'en' ? 'records' : 'سجل'), tight: true, body: UI.table({ columns: cols, rows: U.sortBy(g[1], 'updated_at', 'desc'), onRow: function (o) { location.hash = '#/opportunities/' + o.id; } }) })); pane.appendChild(h('div', { style: { height: '12px' } })); });
-        if (c.known_projects || c.potential_value) pane.appendChild(UI.card({ title: t('cu.known_projects') + ' / ' + t('cu.potential'), body: UI.kv([[t('cu.known_projects'), c.known_projects], [t('cu.potential_value'), canCom ? (c.potential_value ? S.money(c.potential_value) : null) : UI.lockNote()]]) }));
+        if (c.known_projects || c.potential_value) pane.appendChild(UI.card({ title: t('cu.known_projects') + ' · ' + t('cu.potential'), body: UI.kv([[t('cu.known_projects'), c.known_projects], [t('cu.potential_value'), canCom ? (c.potential_value ? S.money(c.potential_value) : null) : UI.lockNote()]]) }));
       },
       projects: function () {
         pane.appendChild(UI.card({ title: t('cu.stats_contracts'), tight: true, body: UI.table({ columns: [

@@ -18,7 +18,7 @@
     { key: 'commercial_reviewer', ar: 'مراجع تجاري',             en: 'Commercial Reviewer' },
     { key: 'contract_reviewer',   ar: 'مراجع عقود',              en: 'Contract Reviewer' },
     { key: 'executive_viewer',    ar: 'مطّلع تنفيذي',            en: 'Executive Viewer' },
-    { key: 'readonly_viewer',     ar: 'مطّلع للقراءة فقط',       en: 'Read-Only Viewer' }
+    { key: 'readonly_viewer',     ar: 'مطّلع (قراءة فقط)',       en: 'Read-Only Viewer' }
   ];
 
   /* الصلاحيات المعرَّفة في المنصة */

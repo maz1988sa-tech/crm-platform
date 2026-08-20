@@ -11,12 +11,52 @@
 
   var L = {};
 
+  /* أسماء القوائم كما تظهر في شاشة الإعدادات */
+  L.listLabels = {
+    customer_types:      { ar: 'أنواع العملاء',            en: 'Customer types' },
+    customer_classes:    { ar: 'تصنيفات العملاء',          en: 'Customer classes' },
+    customer_statuses:   { ar: 'حالات العميل',             en: 'Customer statuses' },
+    customer_sources:    { ar: 'مصادر العملاء',            en: 'Customer sources' },
+    opportunity_sources: { ar: 'مصادر الفرص',              en: 'Opportunity sources' },
+    sectors:             { ar: 'القطاعات',                 en: 'Sectors' },
+    project_types:       { ar: 'أنواع المشاريع',           en: 'Project types' },
+    contact_roles:       { ar: 'أدوار جهات الاتصال',       en: 'Contact roles' },
+    activity_types:      { ar: 'أنواع الأنشطة',            en: 'Activity types' },
+    priorities:          { ar: 'مستويات الأولوية',         en: 'Priorities' },
+    risk_levels:         { ar: 'مستويات المخاطر',          en: 'Risk levels' },
+    loss_reasons:        { ar: 'أسباب الخسارة',            en: 'Loss reasons' },
+    proposal_statuses:   { ar: 'حالات العرض',              en: 'Proposal statuses' },
+    contract_statuses:   { ar: 'حالات العقد',              en: 'Contract statuses' },
+    payment_terms:       { ar: 'شروط الدفع',               en: 'Payment terms' },
+    submission_methods:  { ar: 'طرق تقديم العروض',         en: 'Submission methods' },
+    required_documents:  { ar: 'المستندات المطلوبة',       en: 'Required documents' },
+    vendor_registration: { ar: 'حالات التسجيل كمورّد',     en: 'Vendor registration' },
+    prequalification:    { ar: 'حالات التأهيل المسبق',     en: 'Prequalification' },
+    regions:             { ar: 'المناطق والمدن',           en: 'Regions & cities' },
+    languages:           { ar: 'اللغات',                   en: 'Languages' },
+    contact_channels:    { ar: 'وسائل التواصل',            en: 'Contact channels' },
+    seniority:           { ar: 'المستويات الإدارية',       en: 'Seniority levels' },
+    relationship_strength: { ar: 'قوة العلاقة',            en: 'Relationship strength' },
+    importance:          { ar: 'الأهمية الاستراتيجية',     en: 'Strategic importance' },
+    confidentiality:     { ar: 'تصنيفات السرّية',          en: 'Confidentiality' },
+    vat_treatments:      { ar: 'المعاملات الضريبية',       en: 'VAT treatments' },
+    doc_statuses:        { ar: 'حالات المستند',            en: 'Document statuses' },
+    handover_statuses:   { ar: 'حالات التسليم',            en: 'Handover statuses' },
+    project_statuses:    { ar: 'حالات المشروع',            en: 'Project statuses' },
+    activity_statuses:   { ar: 'حالات النشاط',             en: 'Activity statuses' },
+    approval_types:      { ar: 'أنواع طلبات الاعتماد',     en: 'Approval types' },
+    approval_statuses:   { ar: 'حالات طلب الاعتماد',       en: 'Approval statuses' },
+    outcomes:            { ar: 'نتائج الفرص',              en: 'Opportunity outcomes' },
+    record_origins:      { ar: 'مصادر السجلات',            en: 'Record origins' }
+  };
+  L.listLabel = function (key, lang) { var x = L.listLabels[key]; return x ? (lang === 'en' ? x.en : x.ar) : key; };
+
   L.customer_types = [
     { key: 'government',      ar: 'جهة حكومية',        en: 'Government' },
-    { key: 'semi_government', ar: 'شبه حكومية',        en: 'Semi-government' },
+    { key: 'semi_government', ar: 'جهة شبه حكومية',        en: 'Semi-government' },
     { key: 'private',         ar: 'قطاع خاص',          en: 'Private sector' },
     { key: 'developer',       ar: 'مطوّر عقاري',       en: 'Developer' },
-    { key: 'consultant',      ar: 'استشاري',           en: 'Consultant' },
+    { key: 'consultant',      ar: 'مكتب استشاري',           en: 'Consultant' },
     { key: 'other',           ar: 'أخرى',              en: 'Other' }
   ];
 
@@ -34,10 +74,10 @@
   ];
 
   L.customer_sources = [
-    { key: 'tender_portal',         ar: 'منصة منافسات (اعتماد وغيرها)', en: 'Tender portal (Etimad etc.)' },
-    { key: 'referral',              ar: 'ترشيح/توصية',                  en: 'Referral' },
+    { key: 'tender_portal',         ar: 'بوابة منافسات حكومية', en: 'Tender portal (Etimad etc.)' },
+    { key: 'referral',              ar: 'ترشيح أو توصية',                  en: 'Referral' },
     { key: 'existing_relationship', ar: 'علاقة قائمة',                  en: 'Existing relationship' },
-    { key: 'exhibition',            ar: 'معرض/فعالية',                  en: 'Exhibition / event' },
+    { key: 'exhibition',            ar: 'معرض أو فعالية',                  en: 'Exhibition / event' },
     { key: 'direct_approach',       ar: 'تواصل مباشر',                  en: 'Direct approach' },
     { key: 'consultant',            ar: 'عبر استشاري',                  en: 'Via consultant' },
     { key: 'website',               ar: 'الموقع الإلكتروني',            en: 'Website' },
@@ -125,23 +165,23 @@
     { key: 'email',   ar: 'بريد إلكتروني',  en: 'Email' },
     { key: 'meeting', ar: 'اجتماع حضوري',   en: 'In-person meeting' },
     { key: 'letter',  ar: 'خطاب رسمي',      en: 'Official letter' },
-    { key: 'portal',  ar: 'عبر المنصة/البوابة', en: 'Via portal' }
+    { key: 'portal',  ar: 'عبر البوابة الإلكترونية', en: 'Via portal' }
   ];
 
   L.contact_roles = [
     { key: 'decision_maker', ar: 'صاحب قرار',      en: 'Decision-maker' },
     { key: 'influencer',     ar: 'مؤثّر',          en: 'Influencer' },
     { key: 'technical',      ar: 'جهة فنية',       en: 'Technical contact' },
-    { key: 'procurement',    ar: 'مشتريات/تعاقدات', en: 'Procurement contact' },
-    { key: 'finance',        ar: 'مالية',          en: 'Finance contact' },
-    { key: 'site',           ar: 'جهة ميدانية/موقع', en: 'Site contact' }
+    { key: 'procurement',    ar: 'جهة مشتريات وتعاقدات', en: 'Procurement contact' },
+    { key: 'finance',        ar: 'جهة مالية',          en: 'Finance contact' },
+    { key: 'site',           ar: 'جهة موقع', en: 'Site contact' }
   ];
 
   L.seniority = [
     { key: 'executive', ar: 'قيادة عليا',   en: 'Executive' },
     { key: 'senior',    ar: 'إدارة عليا',   en: 'Senior management' },
     { key: 'middle',    ar: 'إدارة وسطى',   en: 'Middle management' },
-    { key: 'staff',     ar: 'موظف',         en: 'Staff' }
+    { key: 'staff',     ar: 'موظف تنفيذي',         en: 'Staff' }
   ];
 
   L.relationship_strength = [
@@ -192,7 +232,7 @@
   ];
 
   L.vat_treatments = [
-    { key: 'standard',    ar: 'خاضع للضريبة (15٪)', en: 'Standard rated (15%)', rate: 0.15 },
+    { key: 'standard',    ar: 'خاضع للضريبة (15%)', en: 'Standard rated (15%)', rate: 0.15 },
     { key: 'zero',        ar: 'صفري',               en: 'Zero rated', rate: 0 },
     { key: 'exempt',      ar: 'معفى',               en: 'Exempt', rate: 0 }
   ];
@@ -200,7 +240,7 @@
   L.payment_terms = [
     { key: 'monthly_ipc',   ar: 'مستخلصات شهرية',          en: 'Monthly IPCs' },
     { key: 'milestones',    ar: 'دفعات حسب مراحل الإنجاز', en: 'Milestone payments' },
-    { key: 'advance_ipc',   ar: 'دفعة مقدمة + مستخلصات',   en: 'Advance + IPCs' },
+    { key: 'advance_ipc',   ar: 'دفعة مقدمة ثم مستخلصات',   en: 'Advance + IPCs' },
     { key: 'on_completion', ar: 'عند الإنجاز',              en: 'On completion' },
     { key: 'custom',        ar: 'شروط خاصة',                en: 'Custom' }
   ];
@@ -208,8 +248,8 @@
   L.submission_methods = [
     { key: 'portal',        ar: 'عبر المنصة الإلكترونية', en: 'Electronic portal' },
     { key: 'email',         ar: 'بريد إلكتروني',          en: 'Email' },
-    { key: 'hand_delivery', ar: 'تسليم باليد',            en: 'Hand delivery' },
-    { key: 'courier',       ar: 'بريد/شحن',               en: 'Courier' }
+    { key: 'hand_delivery', ar: 'تسليم مباشر',            en: 'Hand delivery' },
+    { key: 'courier',       ar: 'شحن بريدي',               en: 'Courier' }
   ];
 
   L.activity_types = [
@@ -224,7 +264,7 @@
     { key: 'negotiation',         ar: 'تفاوض',              en: 'Negotiation',        icon: 'handshake' },
     { key: 'document_request',    ar: 'طلب مستندات',        en: 'Document request',   icon: 'doc' },
     { key: 'reminder',            ar: 'تذكير',              en: 'Reminder',           icon: 'bell' },
-    { key: 'greeting',            ar: 'تهنئة/مناسبة',       en: 'Greeting',           icon: 'gift' },
+    { key: 'greeting',            ar: 'تهنئة',       en: 'Greeting',           icon: 'gift' },
     { key: 'internal',            ar: 'تنسيق داخلي',        en: 'Internal coordination', icon: 'internal' },
     { key: 'other',               ar: 'نشاط آخر',           en: 'Other',              icon: 'dot' }
   ];
@@ -238,13 +278,13 @@
   L.loss_reasons = [
     { key: 'price',                   ar: 'السعر',                         en: 'Price' },
     { key: 'technical',               ar: 'التقييم الفني',                 en: 'Technical evaluation' },
-    { key: 'prequalification',        ar: 'عدم اجتياز التأهيل',            en: 'Failed prequalification' },
-    { key: 'late_submission',         ar: 'تأخر التقديم',                  en: 'Late submission' },
+    { key: 'prequalification',        ar: 'عدم اجتياز التأهيل المسبق',            en: 'Failed prequalification' },
+    { key: 'late_submission',         ar: 'تأخّر التقديم',                  en: 'Late submission' },
     { key: 'competitor_relationship', ar: 'علاقة المنافس بالعميل',         en: 'Competitor relationship' },
-    { key: 'scope_change',            ar: 'تغيّر النطاق/المتطلبات',        en: 'Scope change' },
-    { key: 'budget_cancelled',        ar: 'إلغاء/تجميد الميزانية',         en: 'Budget cancelled' },
+    { key: 'scope_change',            ar: 'تغيّر النطاق أو المتطلبات',        en: 'Scope change' },
+    { key: 'budget_cancelled',        ar: 'إلغاء الميزانية أو تجميدها',         en: 'Budget cancelled' },
     { key: 'customer_postponed',      ar: 'تأجيل من العميل',               en: 'Postponed by customer' },
-    { key: 'no_response',             ar: 'لا استجابة من العميل',          en: 'No customer response' },
+    { key: 'no_response',             ar: 'عدم استجابة العميل',          en: 'No customer response' },
     { key: 'capacity',                ar: 'قرار داخلي بعدم المشاركة',      en: 'Internal no-bid decision' },
     { key: 'other',                   ar: 'أخرى',                          en: 'Other' }
   ];
@@ -287,7 +327,7 @@
     { key: 'not_started',    ar: 'لم يبدأ',       en: 'Not started',    color: 'slate' },
     { key: 'in_preparation', ar: 'قيد الإعداد',   en: 'In preparation', color: 'info' },
     { key: 'prepared',       ar: 'جاهز للتسليم',  en: 'Prepared',       color: 'warn' },
-    { key: 'accepted',       ar: 'مُستلَم من فريق التنفيذ', en: 'Accepted by delivery', color: 'ok' }
+    { key: 'accepted',       ar: 'مُستلَم', en: 'Accepted by delivery', color: 'ok' }
   ];
 
   L.project_statuses = [
@@ -331,9 +371,9 @@
 
   L.required_documents = [
     { key: 'cr',           ar: 'السجل التجاري',            en: 'Commercial registration' },
-    { key: 'vat_cert',     ar: 'شهادة الضريبة',            en: 'VAT certificate' },
-    { key: 'zakat_cert',   ar: 'شهادة الزكاة',             en: 'Zakat certificate' },
-    { key: 'gosi',         ar: 'شهادة التأمينات',          en: 'GOSI certificate' },
+    { key: 'vat_cert',     ar: 'شهادة ضريبة القيمة المضافة',            en: 'VAT certificate' },
+    { key: 'zakat_cert',   ar: 'شهادة الزكاة والدخل',             en: 'Zakat certificate' },
+    { key: 'gosi',         ar: 'شهادة التأمينات الاجتماعية',          en: 'GOSI certificate' },
     { key: 'saudization',  ar: 'شهادة السعودة',            en: 'Saudization certificate' },
     { key: 'classification', ar: 'شهادة تصنيف المقاولين', en: 'Contractor classification' },
     { key: 'bid_bond',     ar: 'الضمان الابتدائي',         en: 'Bid bond' },
@@ -341,7 +381,7 @@
     { key: 'commercial',   ar: 'العرض المالي',             en: 'Commercial proposal' },
     { key: 'boq',          ar: 'جدول الكميات المسعّر',     en: 'Priced BOQ' },
     { key: 'program',      ar: 'البرنامج الزمني',          en: 'Programme' },
-    { key: 'hse',          ar: 'خطة السلامة',              en: 'HSE plan' },
+    { key: 'hse',          ar: 'خطة السلامة والصحة المهنية',              en: 'HSE plan' },
     { key: 'past_projects', ar: 'سابقة الأعمال',           en: 'Past projects' }
   ];
 

@@ -1,5 +1,5 @@
 /* =====================================================================
-   نظام التصميم — منصة إدارة العملاء والفرص
+   نظام التصميم — إحراز · من الفرصة إلى الإنجاز
    عربي أولًا (RTL) · تنفيذي هادئ · بلا خطوط خارجية · وضع داكن · متجاوب
    القواعد: البطاقات المتجاورة متساوية ومحاذاة؛ الشارات لون + نقطة + نص (لا لون فقط)؛
    الأرقام لاتينية بعرض ثابت؛ نوافذ التفصيل بنفس الهيكل دائمًا (.modal-bg > .modal).
@@ -14,6 +14,8 @@
   --danger: #C0392B; --danger-bg: #FBE2DD; --danger-ink: #8E2418;
   --info: #2B6FB8; --info-bg: #E1EBF6; --info-ink: #1F5891;
   --slate: #6F7A89; --slate-bg: #EEF1F5; --slate-ink: #47505C;
+  --pipe-1: #8AAACD; --pipe-2: #5585B5; --pipe-3: #2E5F93; --pipe-4: #12355B;
+  --brand-ink: #07111F; --brand-blue: #2563EB;   /* هوية «إحراز» — للعلامة فقط */
   --r: 16px; --rc: 12px; --rs: 8px;
   --sh: 0 1px 2px rgba(18,53,91,.06), 0 8px 24px rgba(18,53,91,.08);
   --sh-lg: 0 12px 40px rgba(18,53,91,.18);
@@ -32,6 +34,8 @@ body.dark {
   --danger: #E5665A; --danger-bg: #3F1712; --danger-ink: #F4A199;
   --info: #6AA6E8; --info-bg: #14273C; --info-ink: #A9CBF2;
   --slate: #97A3B3; --slate-bg: #1F2732; --slate-ink: #C2CAD4;
+  --pipe-1: #33526F; --pipe-2: #48719A; --pipe-3: #6396C2; --pipe-4: #93B7DC;
+  --brand-ink: #07111F; --brand-blue: #3B82F6;
   --sh: 0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px -8px rgba(0,0,0,.6);
   --sh-lg: 0 24px 60px -12px rgba(0,0,0,.7);
 }
@@ -67,7 +71,11 @@ img, svg { vertical-align: middle; }
 .app { min-height: 100vh; display: flex; flex-direction: column; }
 .topbar { position: sticky; top: 0; z-index: 40; height: var(--hdr-h); display: flex; align-items: center; gap: 12px; padding: 0 18px; background: var(--card); border-bottom: 1px solid var(--line); box-shadow: 0 1px 0 var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.brand .mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--ink) 0%, var(--accent) 130%); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; flex: 0 0 auto; }
+.brand .mark { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-ink); display: grid; place-items: center; color: #fff; flex: 0 0 auto; }
+.brand.lg .mark { width: 52px; height: 52px; border-radius: 14px; }
+/* داخل اللوحة الداكنة تُعرض العلامة بلا مربّع — نفس خلفية اللوحة */
+.login .side .brand .mark { background: none; width: auto; height: auto; border-radius: 0; }
+.brand .slogan { font-size: 12.5px; color: #B9C7D9; letter-spacing: .01em; white-space: nowrap; margin-top: 2px; }
 .brand .titles { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
 .brand .name { font-weight: 800; font-size: 15px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 body.dark .brand .name { color: var(--txt); }
@@ -257,8 +265,14 @@ table.tbl td.wrap { white-space: normal; }
 table.tbl tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--paper) 55%, var(--card)); }
 table.tbl tbody tr.click { cursor: pointer; }
 table.tbl tbody tr.click:hover td { background: var(--ink-soft); }
-table.tbl td.num, table.tbl th.num { text-align: end; }
-table.tbl td.c, table.tbl th.c { text-align: center; }
+/* المحاذاة: كل الأعمدة في المنتصف — عدا العمود الأول (الاسم/الوصف) والأعمدة متعددة الأسطر،
+   لتبقى قراءة النص العربي/الإنجليزي من بدايته. الترويسة والخلية دائمًا بنفس المحاذاة. */
+table.tbl th, table.tbl td { text-align: center; vertical-align: middle; }
+table.tbl th:first-child, table.tbl td:first-child,
+table.tbl th.wrap, table.tbl td.wrap,
+table.tbl th.start, table.tbl td.start { text-align: start; }
+table.tbl td.num, table.tbl th.num, table.tbl td.c, table.tbl th.c { text-align: center; }
+table.tbl th.end, table.tbl td.end { text-align: end; }
 table.tbl tfoot td { font-weight: 700; background: var(--paper); border-top: 2px solid var(--line2); }
 .sub { display: block; font-size: 11.5px; color: var(--muted); }
 table.tbl .sub, .list .sub, .bcard .sub, .gsearch .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -471,11 +485,11 @@ body.dark .cal .dh { background: var(--ink-soft); color: var(--ink2); }
 .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: radial-gradient(1200px 600px at 80% -10%, var(--ink-soft) 0%, var(--paper) 60%); }
 .login { width: min(920px, 96vw); background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--sh-lg); overflow: hidden; display: grid; grid-template-columns: 1.1fr 1fr; }
 @media (max-width: 800px) { .login { grid-template-columns: 1fr; } }
-.login .side { background: linear-gradient(160deg, var(--ink) 0%, #0B2340 70%, #0F8B8D 160%); color: #fff; padding: 36px 32px; display: flex; flex-direction: column; gap: 14px; }
+.login .side { background: linear-gradient(160deg, #0C1B2E 0%, var(--brand-ink) 58%, #14356B 150%); color: #fff; padding: 36px 32px; display: flex; flex-direction: column; gap: 14px; }
 .login .side h1 { font-size: 24px; }
 .login .side p { opacity: .85; font-size: 14px; line-height: 1.7; }
 .login .side ul { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; opacity: .92; }
-.login .side li::before { content: "◆"; font-size: 9px; margin-inline-end: 8px; color: #7FDAD7; }
+.login .side li::before { content: "◆"; font-size: 9px; margin-inline-end: 8px; color: #5C93F5; }
 .login .pane { padding: 32px 30px; display: flex; flex-direction: column; gap: 14px; }
 .login .pane h2 { font-size: 18px; }
 .demo-users { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -512,3 +526,44 @@ body.dark .cal .dh { background: var(--ink-soft); color: var(--ink2); }
   body { background: #fff; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+
+/* ---------- جدول المسار حسب المرحلة (مجموعات قابلة للطي) ---------- */
+.stbl { width: 100%; }
+.stbl table { width: 100%; border-collapse: collapse; }
+.stbl th { font-size: 11.5px; font-weight: 600; color: var(--faint); padding: 0 10px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.stbl th, .stbl td { text-align: center; vertical-align: middle; }
+.stbl th.l, .stbl td.l, .stbl td.nm { text-align: start; }
+.stbl th.b { width: 34%; }
+.stbl td { padding: 0 10px; height: 28px; font-size: 13px; vertical-align: middle; }
+.stbl td.r { white-space: nowrap; }
+.stbl td.nm { color: var(--txt); padding-inline-start: 24px; max-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stbl td.v { font-weight: 600; }
+.stbl td.pct { color: var(--muted); font-size: 12px; }
+
+.stbl tr.grp { cursor: pointer; }
+.stbl tr.grp td { background: var(--paper); font-weight: 700; font-size: 12.5px; color: var(--txt); height: 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stbl tr.grp:hover td { background: var(--ink-soft); }
+.stbl tr.grp td.l { padding-inline-start: 4px; }
+.stbl .g-tog { background: none; border: 0; padding: 0; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); vertical-align: middle; }
+.stbl .g-tog .ic { transition: transform var(--t); }
+.stbl tr.grp.closed .g-tog .ic { transform: rotate(90deg); }
+body[dir=ltr] .stbl tr.grp.closed .g-tog .ic { transform: rotate(-90deg); }
+.stbl .g-name { background: none; border: 0; padding: 2px 4px; font: inherit; font-weight: 700; color: var(--txt); display: inline-flex; align-items: center; gap: 8px; border-radius: var(--rs); vertical-align: middle; }
+.stbl .g-name:hover { color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+.stbl .g-name:focus-visible { outline: 2px solid var(--ink2); outline-offset: 1px; }
+.stbl .g-name .dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.stbl .g-note { font-size: 11.5px; font-weight: 400; color: var(--faint); }
+
+.stbl tr.stg { cursor: pointer; }
+.stbl tr.stg:hover td { background: var(--ink-soft); }
+.stbl tr.stg.empty { cursor: default; color: var(--faint); }
+.stbl tr.stg.empty td, .stbl tr.stg.empty td.nm { color: var(--faint); font-weight: 400; }
+.stbl tr.stg.empty:hover td { background: transparent; }
+.stbl .tr-bar { display: block; height: 9px; background: var(--slate-bg); border-radius: 5px; overflow: hidden; width: 100%; }
+.stbl .tr-bar i { display: block; height: 100%; border-radius: 4px 0 0 4px; }
+body[dir=ltr] .stbl .tr-bar i { border-radius: 0 4px 4px 0; }
+.stbl + .card-f, .stbl .foot { font-size: 11.5px; color: var(--faint); }
+@media (max-width: 720px) {
+  .stbl th.b, .stbl td.b { display: none; }
+  .stbl td.nm { padding-inline-start: 20px; }
+}

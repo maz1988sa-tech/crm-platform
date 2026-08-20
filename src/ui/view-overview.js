@@ -7,6 +7,8 @@
   root.VIEWS = root.VIEWS || {};
 
   var periodKey = 'this_year';
+  var stageCollapse = {};                       /* حالة طي مجموعات المسار — تبقى بين عمليات إعادة الرسم */
+  var GROUP_TONE = { prospecting: 'var(--pipe-1)', qualification: 'var(--pipe-2)', proposal: 'var(--pipe-3)', negotiation: 'var(--pipe-4)' };
 
   function oppColumns() {
     return [
@@ -51,9 +53,37 @@
 
       /* الرسوم */
       var two = h('div', { class: 'two', style: { marginTop: '16px' } });
-      var stages = R.pipelineByStage(db);
-      var barCard = UI.card({ title: t('ov.pipeline_by_stage'), sub: canCom ? t('ov.def.pipeline') : (S.lang === 'en' ? 'Counts only (values restricted)' : 'الأعداد فقط (القيم محجوبة)'), body: UI.barChart({ data: stages.map(function (s) { return { label: String(STAGES.get(s.key).order), title: S.lang === 'en' ? s.label_en : s.label_ar, value: canCom ? s.value : s.count, sub: String(s.count), color: STAGES.get(s.key).color === 'ok' ? 'ok' : (STAGES.get(s.key).color === 'warn' ? 'warn' : (STAGES.get(s.key).color === 'accent' ? 'accent' : '')), onClick: function () { drillOpps(S.lang === 'en' ? s.label_en : s.label_ar, s.items); } }; }), height: 260, format: canCom ? function (v, short) { return short ? U.fmtMoneyShort(v, S.lang).replace(/ ?(SAR|ر\.س) ?/, '') : S.money(v); } : null }) });
-      barCard.appendChild(h('div', { class: 'card-f', style: { flexWrap: 'wrap', gap: '4px 12px', fontSize: '11.5px', color: 'var(--muted)' } }, stages.map(function (s) { return h('span', null, h('b', null, String(STAGES.get(s.key).order)), ' ' + (S.lang === 'en' ? s.label_en : s.label_ar)); })));
+      var stages = R.pipelineByStage(db).filter(function (x) { return STAGES.isActive(x.key); });
+      var stGroups = [];
+      STAGES.groups.forEach(function (gr) {
+        var rows = stages.filter(function (x) { var st = STAGES.get(x.key); return st && st.group === gr.key; });
+        if (!rows.length) return;
+        stGroups.push({
+          key: gr.key,
+          label: STAGES.groupLabel(gr.key, S.lang),
+          color: GROUP_TONE[gr.key] || 'var(--ink)',
+          count: U.sum(rows, 'count'),
+          value: U.sum(rows, 'value'),
+          items: rows.reduce(function (a, r) { return a.concat(r.items); }, []),
+          stages: rows.map(function (x) { return { key: x.key, label: S.lang === 'en' ? x.label_en : x.label_ar, count: x.count, value: x.value, items: x.items }; })
+        });
+      });
+      var stTable = UI.stageTable({
+        groups: stGroups, canCom: canCom, state: stageCollapse,
+        onToggle: function (st) { stageCollapse = st; },
+        onStage: function (x) { drillOpps(x.label, x.items); },
+        onGroup: function (g) { drillOpps(g.label, g.items); }
+      });
+      var barCard = UI.card({
+        title: t('ov.pipeline_by_stage'),
+        sub: canCom ? t('ov.def.pipeline') : (S.lang === 'en' ? 'Counts only (values restricted)' : 'الأعداد فقط — القيم غير متاحة لدورك'),
+        actions: stTable.allBtn,
+        tight: true,
+        body: stTable,
+        footer: h('span', { class: 'small muted' }, canCom
+          ? (S.lang === 'en' ? 'Values in SAR · click a group name for its opportunities, a stage row for that stage.' : 'القيم بالريال السعودي · اضغط اسم المجموعة لعرض فرصها، أو صف المرحلة لعرض فرص المرحلة.')
+          : (S.lang === 'en' ? 'Click a group name for its opportunities, a stage row for that stage.' : 'اضغط اسم المجموعة لعرض فرصها، أو صف المرحلة لعرض فرص المرحلة.'))
+      });
       two.appendChild(barCard);
       var awards = R.expectedAwards(db, 6);
       var awCard = UI.card({ title: t('ov.awards_by_month'), sub: S.lang === 'en' ? 'By expected award date · next 6 months' : 'حسب تاريخ الترسية المتوقع · الأشهر الستة القادمة', body: UI.hbars({ rows: awards.map(function (a) { return { label: U.fmtMonth(a.month, S.lang), value: canCom ? a.weighted : a.count, color: 'accent', onClick: function () { drillOpps(U.fmtMonth(a.month, S.lang), a.items); } }; }), format: function (v, r) { var a = awards.find(function (x) { return U.fmtMonth(x.month, S.lang) === r.label; }); return canCom ? (S.moneyShort(v) + ' · ' + a.count) : String(v); } }), footer: h('span', { class: 'small muted' }, canCom ? t('ov.def.weighted') : '') });

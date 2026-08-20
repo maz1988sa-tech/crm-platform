@@ -15,11 +15,11 @@
   var STAGES = [
     { key: 'potential_identified',  order: 1,  ar: 'تحديد عميل محتمل',                 en: 'Potential customer identified',    group: 'prospecting',   probability: 5,  max_days: 30, color: 'slate' },
     { key: 'initial_contact',       order: 2,  ar: 'التواصل الأولي',                   en: 'Initial contact',                  group: 'prospecting',   probability: 10, max_days: 30, color: 'slate' },
-    { key: 'qualification',         order: 3,  ar: 'تأهيل العميل/الفرصة',              en: 'Qualification',                    group: 'prospecting',   probability: 10, max_days: 30, color: 'slate' },
+    { key: 'qualification',         order: 3,  ar: 'تأهيل العميل والفرصة',              en: 'Qualification',                    group: 'prospecting',   probability: 10, max_days: 30, color: 'slate' },
     { key: 'opportunity_identified',order: 4,  ar: 'تحديد الفرصة',                     en: 'Opportunity identified',           group: 'qualification', probability: 15, max_days: 45, color: 'info', required_fields: ['estimated_value', 'project_type'] },
-    { key: 'prequalification',      order: 5,  ar: 'التأهيل المسبق / تسجيل الموردين',  en: 'Prequalification / vendor registration', group: 'qualification', probability: 15, max_days: 60, color: 'info' },
-    { key: 'requirements_received', order: 6,  ar: 'استلام المتطلبات / كراسة الشروط', en: 'Requirements received',            group: 'qualification', probability: 20, max_days: 21, color: 'info' },
-    { key: 'site_visit',            order: 7,  ar: 'زيارة الموقع / التقييم الفني',     en: 'Site visit / technical assessment', group: 'qualification', probability: 25, max_days: 21, color: 'info' },
+    { key: 'prequalification',      order: 5,  ar: 'التأهيل المسبق والتسجيل كمورّد',  en: 'Prequalification / vendor registration', group: 'qualification', probability: 15, max_days: 60, color: 'info' },
+    { key: 'requirements_received', order: 6,  ar: 'استلام كراسة الشروط والمواصفات', en: 'Requirements received',            group: 'qualification', probability: 20, max_days: 21, color: 'info' },
+    { key: 'site_visit',            order: 7,  ar: 'زيارة الموقع والتقييم الفني',     en: 'Site visit / technical assessment', group: 'qualification', probability: 25, max_days: 21, color: 'info' },
     { key: 'awaiting_proposal_prep',order: 8,  ar: 'بانتظار بدء إعداد العرض',          en: 'Awaiting proposal preparation',    group: 'proposal',      probability: 30, max_days: 10, color: 'accent', required_fields: ['submission_deadline', 'expected_award_date'] },
     { key: 'proposal_in_preparation', order: 9, ar: 'العرض قيد الإعداد',               en: 'Proposal under preparation',       group: 'proposal',      probability: 35, max_days: 21, color: 'accent' },
     { key: 'internal_review',       order: 10, ar: 'المراجعة والاعتماد الداخلي',       en: 'Internal review & approval',       group: 'proposal',      probability: 40, max_days: 7,  color: 'accent' },
@@ -27,7 +27,7 @@
     { key: 'technical_clarification', order: 12, ar: 'استيضاحات فنية',                 en: 'Technical clarification',          group: 'negotiation',   probability: 50, max_days: 21, color: 'warn' },
     { key: 'commercial_clarification', order: 13, ar: 'استيضاحات تجارية',              en: 'Commercial clarification',         group: 'negotiation',   probability: 55, max_days: 21, color: 'warn' },
     { key: 'negotiation',           order: 14, ar: 'التفاوض',                          en: 'Negotiation',                      group: 'negotiation',   probability: 60, max_days: 30, color: 'warn' },
-    { key: 'preferred_bidder',      order: 15, ar: 'إشارة مبدئية / المتقدم المفضّل',   en: 'Verbal indication / preferred bidder', group: 'negotiation', probability: 75, max_days: 30, color: 'warn' },
+    { key: 'preferred_bidder',      order: 15, ar: 'إشارة مبدئية بالترسية',   en: 'Verbal indication / preferred bidder', group: 'negotiation', probability: 75, max_days: 30, color: 'warn' },
     { key: 'awaiting_award',        order: 16, ar: 'بانتظار قرار الترسية',             en: 'Awaiting award decision',          group: 'negotiation',   probability: 70, max_days: 45, color: 'warn' },
     /* من الترسية فصاعدًا تُعد الفرصة "مُرساة" (won) لأغراض نسبة الفوز، وتخرج من قيمة المسار المفتوح */
     { key: 'awarded',               order: 17, ar: 'تمت الترسية',                      en: 'Awarded',                          group: 'award',         probability: 90, max_days: 21, color: 'ok', won: true },
@@ -40,10 +40,10 @@
   ];
 
   var GROUPS = [
-    { key: 'prospecting',   ar: 'استكشاف',          en: 'Prospecting' },
-    { key: 'qualification', ar: 'تأهيل ومتطلبات',   en: 'Qualification' },
+    { key: 'prospecting',   ar: 'الاستكشاف',          en: 'Prospecting' },
+    { key: 'qualification', ar: 'التأهيل والمتطلبات',   en: 'Qualification' },
     { key: 'proposal',      ar: 'إعداد العرض وتقديمه', en: 'Proposal' },
-    { key: 'negotiation',   ar: 'استيضاح وتفاوض',   en: 'Clarification & negotiation' },
+    { key: 'negotiation',   ar: 'الاستيضاح والتفاوض',   en: 'Clarification & negotiation' },
     { key: 'award',         ar: 'الترسية',          en: 'Award' },
     { key: 'contract',      ar: 'التعاقد والتسليم', en: 'Contract & handover' },
     { key: 'parked',        ar: 'معلّقة',           en: 'Parked' },

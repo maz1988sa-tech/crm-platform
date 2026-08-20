@@ -237,7 +237,7 @@
         { type: 'section', label: t('op.commercial') },
         { key: 'proposed_value', label: t('pr.value'), type: 'money', sensitive: true, locked: locked },
         { key: 'vat_treatment', label: t('op.vat'), type: 'select', lookup: 'vat_treatments' },
-        { key: 'discount_pct', label: t('pr.discount'), type: 'pct', sensitive: true, locked: locked, hint: RULES.approvals.discount.enabled ? (S.lang === 'en' ? 'Above ' + RULES.approvals.discount.threshold_pct + '% requires commercial approval' : 'أكثر من ' + RULES.approvals.discount.threshold_pct + '٪ يتطلب اعتماد المراجع التجاري') : null },
+        { key: 'discount_pct', label: t('pr.discount'), type: 'pct', sensitive: true, locked: locked, hint: RULES.approvals.discount.enabled ? (S.lang === 'en' ? 'Above ' + RULES.approvals.discount.threshold_pct + '% requires commercial approval' : 'أكثر من ' + RULES.approvals.discount.threshold_pct + '% يتطلب اعتماد المراجع التجاري') : null },
         { key: 'validity_days', label: t('pr.validity'), type: 'int' },
         { key: 'notes', label: t('app.notes'), type: 'textarea', span2: true }
       ].filter(Boolean);
@@ -311,7 +311,7 @@
       var m = UI.formModal({ title: t('ac.complete'), sub: act.purpose || S.label('activity_types', act.type), size: 'sm', cols: 1, fields: [
         { key: 'outcome', label: t('ac.outcome'), type: 'textarea', required: true },
         { key: 'next_action', label: t('ac.next_action'), type: 'text' },
-        { key: 'follow_up_date', label: t('ct.next_followup'), type: 'date', hint: S.lang === 'en' ? 'Creates a follow-up reminder' : 'يُنشئ تذكير متابعة تلقائيًا' },
+        { key: 'follow_up_date', label: t('ct.next_followup'), type: 'date', hint: S.lang === 'en' ? 'Creates a follow-up reminder' : 'يُنشأ تذكير متابعة تلقائيًا' },
         { key: 'follow_up_type', label: t('ac.type'), type: 'select', lookup: 'activity_types' }
       ], values: { outcome: act.outcome || '', next_action: act.next_action || '', follow_up_type: 'call' }, saveLabel: t('ac.complete'),
         onSubmit: function (vals) { return after(S.adapter.completeActivity(act.id, vals)).then(resolve); } });

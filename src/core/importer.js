@@ -25,7 +25,7 @@
         { field: 'vat_number', headers: ['الرقم الضريبي', 'vat_number', 'vat'] },
         { field: 'phone', headers: ['الهاتف', 'phone'] },
         { field: 'email', headers: ['البريد الإلكتروني', 'email'] },
-        { field: 'website', headers: ['الموقع', 'website'] },
+        { field: 'website', headers: ['الموقع الإلكتروني', 'الموقع', 'website'] },
         { field: 'region', headers: ['المنطقة', 'region'], lookup: 'regions', required: true },
         { field: 'city', headers: ['المدينة', 'city'] },
         { field: 'address', headers: ['العنوان', 'address'] },
@@ -45,12 +45,12 @@
         { field: 'customer_ref', headers: ['العميل', 'customer', 'customer_id', 'customer_ref'], required: true, customerRef: true },
         { field: 'full_name', headers: ['الاسم الكامل', 'الاسم', 'full_name', 'name'], required: true },
         { field: 'position', headers: ['المسمى الوظيفي', 'position'] },
-        { field: 'department', headers: ['الإدارة', 'department'] },
-        { field: 'seniority', headers: ['المستوى', 'seniority'], lookup: 'seniority' },
-        { field: 'roles', headers: ['الدور', 'roles', 'role'], multi: 'contact_roles' },
+        { field: 'department', headers: ['الإدارة أو القسم', 'الإدارة', 'department'] },
+        { field: 'seniority', headers: ['المستوى الإداري', 'المستوى', 'seniority'], lookup: 'seniority' },
+        { field: 'roles', headers: ['الدور في اتخاذ القرار', 'الدور', 'roles', 'role'], multi: 'contact_roles' },
         { field: 'phone', headers: ['الهاتف', 'phone'] },
         { field: 'email', headers: ['البريد الإلكتروني', 'email'] },
-        { field: 'preferred_channel', headers: ['وسيلة التواصل', 'preferred_channel'], lookup: 'contact_channels' },
+        { field: 'preferred_channel', headers: ['وسيلة التواصل المفضلة', 'وسيلة التواصل', 'preferred_channel'], lookup: 'contact_channels' },
         { field: 'preferred_language', headers: ['اللغة', 'preferred_language', 'language'], lookup: 'languages' },
         { field: 'notes', headers: ['ملاحظات', 'notes'] }
       ]
@@ -221,15 +221,15 @@
 
     errorLabel: function (e, lang) {
       var m = {
-        required: ['قيمة إلزامية مفقودة', 'Required value missing'], unsafe_formula: ['تبدأ الخلية بصيغة غير آمنة (= + - @) ورُفضت', 'Cell starts with an unsafe formula (= + - @) and was rejected'],
-        invalid_value: ['قيمة غير معروفة في القائمة', 'Unknown list value'], invalid_date: ['تاريخ غير صالح', 'Invalid date'], invalid_number: ['رقم غير صالح', 'Invalid number'],
+        required: ['قيمة إلزامية مفقودة', 'Required value missing'], unsafe_formula: ['الخلية تبدأ بصيغة غير آمنة (= + - @) ورُفضت', 'Cell starts with an unsafe formula (= + - @) and was rejected'],
+        invalid_value: ['قيمة غير موجودة في القائمة المعتمدة', 'Unknown list value'], invalid_date: ['تاريخ غير صالح', 'Invalid date'], invalid_number: ['رقم غير صالح', 'Invalid number'],
         unknown_user: ['مستخدم غير معروف (البريد أو الاسم)', 'Unknown user (email or name)'], unknown_customer: ['عميل غير موجود (المعرّف أو الاسم)', 'Customer not found (ID or name)'],
         invalid_cr: ['السجل التجاري يجب أن يكون 10 أرقام', 'CR must be 10 digits'], invalid_vat: ['الرقم الضريبي يجب أن يكون 15 رقمًا', 'VAT must be 15 digits'], invalid_unified: ['الرقم الموحد غير صالح', 'Invalid unified number'],
-        invalid_email: ['بريد غير صالح', 'Invalid email'], invalid_phone: ['هاتف غير صالح', 'Invalid phone'],
-        duplicate_db: ['مكرر مع سجل موجود {with}', 'Duplicates existing record {with}'], duplicate_file: ['مكرر مع الصف {with} في الملف', 'Duplicates row {with} in the file'],
+        invalid_email: ['بريد إلكتروني غير صالح', 'Invalid email'], invalid_phone: ['رقم هاتف غير صالح', 'Invalid phone'],
+        duplicate_db: ['مكرر مع سجل قائم {with}', 'Duplicates existing record {with}'], duplicate_file: ['مكرر مع الصف {with} في الملف', 'Duplicates row {with} in the file'],
         possible_duplicate_db: ['اشتباه تكرار مع السجل {with}', 'Possible duplicate of {with}'], possible_duplicate_file: ['اشتباه تكرار مع الصف {with}', 'Possible duplicate of row {with}'],
         lost_without_reason: ['فرصة خاسرة بلا سبب خسارة', 'Lost opportunity without loss reason'],
-        missing_columns: ['أعمدة إلزامية مفقودة: {columns}', 'Missing required columns: {columns}'], empty_file: ['الملف فارغ', 'File is empty'], too_many_rows: ['عدد الصفوف {got} يتجاوز الحد {max}', 'Row count {got} exceeds the limit {max}'], unknown_module: ['نوع بيانات غير معروف', 'Unknown data type']
+        missing_columns: ['أعمدة إلزامية مفقودة: {columns}', 'Missing required columns: {columns}'], empty_file: ['الملف فارغ', 'File is empty'], too_many_rows: ['عدد الصفوف {got} يتجاوز الحد المسموح {max}', 'Row count {got} exceeds the limit {max}'], unknown_module: ['نوع بيانات غير معروف', 'Unknown data type']
       };
       var s = m[e.key] ? (lang === 'en' ? m[e.key][1] : m[e.key][0]) : e.key;
       return s.replace('{with}', e.with || '').replace('{columns}', (e.columns || []).join('، ')).replace('{got}', e.got || '').replace('{max}', e.max || '');

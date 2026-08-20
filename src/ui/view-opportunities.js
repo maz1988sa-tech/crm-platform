@@ -55,7 +55,7 @@
     var users = S.live('users').filter(function (u) { return ['bd_employee', 'bd_manager', 'system_admin', 'proposal_manager'].indexOf(u.role) >= 0; }).map(function (u) { return { value: u.id, label: S.userName(u.id) }; });
     var flagOpts = [{ value: 'any', label: t('op.hygiene') }].concat(['stuck', 'no_activity', 'no_next_action', 'next_action_overdue', 'award_passed', 'proposal_expired', 'no_owner', 'high_value_no_action', 'deadline_passed'].map(function (k) { return { value: k, label: ENGINE.flagLabel(k, S.lang) }; }));
     var bar = UI.filters({ values: f, items: [
-      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('op.name') + ' / ' + t('op.tender_ref') + ' / ' + t('app.customer') },
+      { key: 'q', type: 'search', placeholder: t('app.search') + ' — ' + t('op.name') + ' · ' + t('op.tender_ref') + ' · ' + t('app.customer') },
       { key: 'stage', type: 'select', label: t('op.filter_stage'), lookup: 'stages' },
       { key: 'group', type: 'select', label: t('op.filter_group'), options: STAGES.groups.map(function (g) { return { value: g.key, label: S.lang === 'en' ? g.en : g.ar }; }) },
       { key: 'owner_id', type: 'select', label: t('op.filter_owner'), options: users },

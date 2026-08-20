@@ -60,10 +60,10 @@
   };
   E.flagLabel = function (key, lang) {
     var m = {
-      stuck: ['عالقة في مرحلتها', 'Stuck in stage'], no_activity: ['بلا نشاط حديث', 'No recent activity'], no_next_action: ['بلا إجراء تالٍ', 'No next action'],
+      stuck: ['متوقفة في مرحلتها', 'Stuck in stage'], no_activity: ['بلا نشاط حديث', 'No recent activity'], no_next_action: ['بلا إجراء تالٍ', 'No next action'],
       next_action_overdue: ['الإجراء التالي متأخر', 'Next action overdue'], award_passed: ['تجاوز تاريخ الترسية المتوقع', 'Expected award passed'],
-      no_owner: ['بلا مسؤول', 'No owner'], high_value_no_action: ['عالية القيمة بلا إجراء', 'High value, no action'], missing_value: ['بلا قيمة تقديرية', 'Missing value'],
-      missing_award_date: ['بلا تاريخ ترسية متوقع', 'Missing award date'], proposal_expired: ['عرض منتهي الصلاحية', 'Proposal expired'], deadline_passed: ['فات موعد التقديم', 'Deadline passed']
+      no_owner: ['بلا مسؤول', 'No owner'], high_value_no_action: ['عالية القيمة وبلا إجراء', 'High value, no action'], missing_value: ['بلا قيمة تقديرية', 'Missing value'],
+      missing_award_date: ['بلا تاريخ ترسية متوقع', 'Missing award date'], proposal_expired: ['عرض منتهي الصلاحية', 'Proposal expired'], deadline_passed: ['تجاوزت موعد التقديم', 'Deadline passed']
     };
     var e = m[key]; return e ? (lang === 'en' ? e[1] : e[0]) : key;
   };
@@ -176,9 +176,9 @@
       opportunity_missing_value: ['فرص بلا قيمة تقديرية', 'Opportunities without value'],
       opportunity_missing_award_date: ['فرص بلا تاريخ ترسية متوقع', 'Opportunities without expected award date'],
       opportunity_no_owner: ['فرص بلا مسؤول', 'Opportunities without owner'],
-      proposal_missing_deadline: ['عروض بلا موعد تقديم', 'Proposals without deadline'],
-      contract_handover_incomplete: ['عقود موقَّعة لم تكتمل حزمة تسليمها', 'Signed contracts with incomplete handover'],
-      contact_missing_details: ['جهات اتصال بلا هاتف أو بريد', 'Contacts without phone or email']
+      proposal_missing_deadline: ['عروض بلا موعد تقديم محدّد', 'Proposals without deadline'],
+      contract_handover_incomplete: ['عقود موقَّعة بلا حزمة تسليم مكتملة', 'Signed contracts with incomplete handover'],
+      contact_missing_details: ['جهات اتصال بلا هاتف أو بريد إلكتروني', 'Contacts without phone or email']
     };
     var e = m[key]; return e ? (lang === 'en' ? e[1] : e[0]) : key;
   };

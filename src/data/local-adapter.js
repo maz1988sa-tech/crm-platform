@@ -351,7 +351,7 @@
     this._audit(opts.reopen ? 'reopen' : 'stage_change', 'opportunity', opp.id, { stage: from, probability: before.probability }, { stage: to, probability: opp.probability, reason: opts.reason || null }, 'ui');
     /* تهنئة الترسية: فرصة علاقات (لا تُرسل تلقائيًا) — تُسجَّل كتذكير نشاط */
     if (to === 'awarded') {
-      var act = Object.assign(MODEL.defaults('activity', this.user.id), { id: this._nextId('ACT'), customer_id: opp.customer_id, opportunity_id: opp.id, contact_id: opp.main_contact_id || null, type: 'greeting', at: U.isoDateTime(U.now()), owner_id: opp.owner_id || this.user.id, purpose: 'إعداد رسالة شكر/تهنئة بمناسبة الترسية (تتطلب اعتمادًا قبل الإرسال)', status: 'planned', priority: 'medium', due_date: U.isoDate(U.addDays(U.now(), 3)), created_by: this.user.id, origin: 'platform' });
+      var act = Object.assign(MODEL.defaults('activity', this.user.id), { id: this._nextId('ACT'), customer_id: opp.customer_id, opportunity_id: opp.id, contact_id: opp.main_contact_id || null, type: 'greeting', at: U.isoDateTime(U.now()), owner_id: opp.owner_id || this.user.id, purpose: 'إعداد رسالة تهنئة بمناسبة الترسية (تتطلب اعتمادًا قبل الإرسال)', status: 'planned', priority: 'medium', due_date: U.isoDate(U.addDays(U.now(), 3)), created_by: this.user.id, origin: 'platform' });
       this.db.activities.push(act);
     }
     this._persist();

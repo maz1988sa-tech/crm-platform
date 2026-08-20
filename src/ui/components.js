@@ -20,6 +20,7 @@
     plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     chev: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+    caret: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
     info: 'i',
     lock: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
     download: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>',
@@ -33,6 +34,20 @@
     filter: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5z"/></svg>',
     link: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'
   };
+  /* ---------- علامة المنصة (إحراز) ----------
+     شبكة 12×12 · سماكة الشريط 2 · فجوة داخلية 1.5 · نصف قطر خارجي 1
+     الشريط الأزرق = الفرصة (المُدخل)، والجزء الداكن = المسار والمخرج (يرث لون النص). */
+  var BRAND_MARK = '<svg viewBox="0 0 12 12" width="SZ" height="SZ" fill="none" focusable="false" aria-hidden="true">'
+    + '<g stroke-width="2" stroke-linecap="butt" stroke-linejoin="round" transform="translate(-0.65 0.34)">'
+    + '<path d="M11 0.9 6.8 5.1" stroke="#2563EB"/>'
+    + '<path d="M5.74 6.16 2.6 9.3H9.9l1.1 1.1" stroke="currentColor"/>'
+    + '</g></svg>';
+  UI.brandMark = function (size, cls) {
+    var el = h('span', { class: 'mark' + (cls ? ' ' + cls : ''), 'aria-hidden': 'true' });
+    el.innerHTML = BRAND_MARK.replace(/SZ/g, String(size || 22));
+    return el;
+  };
+
   UI.icon = function (name) { var s = h('span', { class: 'ic', 'aria-hidden': 'true' }); s.innerHTML = ICONS[name] || ''; return s; };
   UI.ICONS = ICONS;
 
@@ -58,7 +73,7 @@
   UI.userCell = function (userId) { if (!userId) return h('span', { class: 'muted' }, '—'); return h('span', { style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } }, UI.miniAvatar(userId), S.userName(userId)); };
   UI.money = function (n, short) { if (n === null || n === undefined || n === '') return h('span', { class: 'muted' }, '—'); return h('span', { class: 'money' }, short ? S.moneyShort(n) : S.money(n)); };
   UI.dateCell = function (d, withHijri) { if (!d) return h('span', { class: 'muted' }, '—'); var el = h('span', { class: 'nowrap' }, S.date(d)); if (withHijri && root.APP_CONFIG.locale.show_hijri) el.appendChild(h('span', { class: 'sub' }, S.hijri(d))); return el; };
-  UI.lockNote = function () { return h('span', { class: 'sensitive-lock', title: S.lang === 'en' ? 'Commercial values hidden for your role' : 'القيم التجارية محجوبة عن دورك' }, UI.icon('lock'), S.lang === 'en' ? 'Restricted' : 'محجوب'); };
+  UI.lockNote = function () { return h('span', { class: 'sensitive-lock', title: S.lang === 'en' ? 'Commercial values hidden for your role' : 'القيم التجارية غير متاحة لدورك' }, UI.icon('lock'), S.lang === 'en' ? 'Restricted' : 'محجوب'); };
 
   /* ---------- بطاقة مؤشر ---------- */
   UI.kpi = function (o) {
@@ -107,7 +122,7 @@
     if (e && e.code === 'forbidden') msg = t('app.permission_denied');
     else if (e && e.code === 'stale') msg = t('app.stale_write');
     else if (e && e.code === 'validation') msg = t('app.validation_failed') + (e.details && e.details.fields ? ': ' + e.details.fields.join('، ') : '');
-    else if (e && e.code === 'invalid_transition') msg = (S.lang === 'en' ? 'Action not allowed in the current state: ' : 'الإجراء غير مسموح في الحالة الحالية: ') + (e.message || '');
+    else if (e && e.code === 'invalid_transition') msg = (S.lang === 'en' ? 'Action not allowed in the current state: ' : 'الإجراء غير متاح في الحالة الحالية: ') + (e.message || '');
     else if (e && e.code === 'network') msg = t('app.offline_source');
     else if (e && e.message && e.code) msg = msg + ' (' + e.code + ')';
     console.warn(e);
@@ -212,7 +227,7 @@
     table.appendChild(cg);
     var thead = h('thead'), tr = h('tr');
     cols.forEach(function (c) {
-      var th = h('th', { class: (c.num ? 'num ' : '') + (c.center ? 'c ' : '') + (c.sortable ? 'sortable' : ''), scope: 'col' }, c.label);
+      var th = h('th', { class: (c.num ? 'num ' : '') + (c.center ? 'c ' : '') + (c.wrap ? 'wrap ' : '') + (c.align ? c.align + ' ' : '') + (c.sortable ? 'sortable' : ''), scope: 'col' }, c.label);
       if (c.sortable) {
         var dir = o.sort && o.sort.key === c.key ? o.sort.dir : null;
         if (dir) th.setAttribute('aria-sort', dir === 'asc' ? 'ascending' : 'descending');
@@ -230,7 +245,7 @@
         var row = h('tr', { class: o.onRow ? 'click' : '', tabindex: o.onRow ? '0' : null, 'data-id': o.rowKey ? r[o.rowKey] : null });
         cols.forEach(function (c) {
           var v = c.get ? c.get(r, i) : r[c.key];
-          var td = h('td', { class: (c.num ? 'num ' : '') + (c.center ? 'c ' : '') + (c.wrap ? 'wrap ' : '') + (c.hideSm ? 'hide-sm' : ''), 'data-label': c.label, title: (typeof v === 'string' && v.length > 18) ? v : null });
+          var td = h('td', { class: (c.num ? 'num ' : '') + (c.center ? 'c ' : '') + (c.wrap ? 'wrap ' : '') + (c.align ? c.align + ' ' : '') + (c.hideSm ? 'hide-sm' : ''), 'data-label': c.label, title: (typeof v === 'string' && v.length > 18) ? v : null });
           D.append(td, v === null || v === undefined ? h('span', { class: 'muted' }, '—') : v);
           row.appendChild(td);
         });
@@ -239,7 +254,7 @@
       });
     }
     table.appendChild(tbody);
-    if (o.footer) { var tf = h('tfoot'), ftr = h('tr'); cols.forEach(function (c) { var v = o.footer[c.key]; ftr.appendChild(h('td', { class: c.num ? 'num' : '', 'data-label': c.label }, v === undefined ? '' : v)); }); tf.appendChild(ftr); table.appendChild(tf); }
+    if (o.footer) { var tf = h('tfoot'), ftr = h('tr'); cols.forEach(function (c) { var v = o.footer[c.key]; ftr.appendChild(h('td', { class: (c.num ? 'num ' : '') + (c.center ? 'c ' : '') + (c.wrap ? 'wrap ' : '') + (c.align || ''), 'data-label': c.label }, v === undefined ? '' : v)); }); tf.appendChild(ftr); table.appendChild(tf); }
     wrap.appendChild(table);
     return wrap;
   };
@@ -530,6 +545,87 @@
     var legend = h('div', { class: 'legend', style: { flexDirection: 'column', gap: '6px' } });
     slices.forEach(function (s, i) { legend.appendChild(h('span', null, h('i', { style: { background: s.color || colors[i % 4] } }), s.label + ' — ' + U.fmtNum(s.value) + ' (' + U.pct(s.value / total * 100) + ')')); });
     return h('div', { class: 'donut-wrap' }, svg, legend);
+  };
+
+  /* ---------- جدول المسار حسب المرحلة (مجموعات قابلة للطي) ---------- */
+  UI.stageTable = function (o) {
+    var groups = o.groups || [], canCom = o.canCom !== false;
+    var state = o.state || {};                       /* { groupKey: true } = مطوية */
+    var metric = function (x) { return canCom ? (x.value || 0) : (x.count || 0); };
+    var total = groups.reduce(function (a, g) { return a + metric(g); }, 0);
+    var max = 1;
+    groups.forEach(function (g) { (g.stages || []).forEach(function (st) { max = Math.max(max, metric(st)); }); });
+    function amount(x) { return canCom ? U.fmtMoneyShort(metric(x), S.lang).replace(/ ?(SAR|ر\.س) ?/, '') : U.fmtNum(metric(x)); }
+    function share(x, digits) { if (!total) return '—'; var p = metric(x) / total * 100; return U.pct(p, digits === undefined ? (p > 0 && p < 10 ? 1 : 0) : digits); }
+    function bar(x, color) {
+      var w = Math.max(metric(x) > 0 ? 0.8 : 0, metric(x) / max * 100);
+      return h('span', { class: 'tr-bar' }, h('i', { style: { width: w.toFixed(1) + '%', background: color } }));
+    }
+
+    var wrap = h('div', { class: 'stbl' });
+    var tbl = h('table');
+    var head = h('tr', null, h('th', { class: 'l' }, t('app.stage')), h('th', { class: 'r' }, t('nav.opportunities')));
+    if (canCom) head.appendChild(h('th', { class: 'r' }, t('app.value')));
+    head.appendChild(h('th', { class: 'b' }, t('ov.share_of_pipeline')));
+    head.appendChild(h('th', { class: 'r' }, '%'));
+    tbl.appendChild(h('thead', null, head));
+    var tbody = h('tbody');
+    tbl.appendChild(tbody);
+    wrap.appendChild(tbl);
+
+    var allBtn = h('button', { class: 'btn sm ghost', type: 'button', on: { click: function () { var closeAll = !allClosed(); groups.forEach(function (g) { state[g.key] = closeAll; }); render(); } } });
+    wrap.allBtn = allBtn;
+    function allClosed() { return groups.length > 0 && groups.every(function (g) { return !!state[g.key]; }); }
+    function syncAllBtn() {
+      var open = !allClosed();
+      D.clear(allBtn);
+      allBtn.appendChild(UI.icon('caret'));
+      allBtn.appendChild(D.text(open ? t('app.collapse_all') : t('app.expand_all')));
+      allBtn.classList.toggle('is-closed', !open);
+      allBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function toggle(key) { state[key] = !state[key]; render(); if (o.onToggle) o.onToggle(state); }
+
+    function groupRow(g) {
+      var closed = !!state[g.key];
+      var tr = h('tr', { class: 'grp' + (closed ? ' closed' : ''), on: { click: function (e) { if (e.target.closest('.g-name')) return; toggle(g.key); } } });
+      var td = h('td', { class: 'l' });
+      var tg = h('button', { class: 'g-tog', type: 'button', tabindex: '-1', 'aria-hidden': 'true' }, UI.icon('caret'));
+      var nm = h('button', {
+        class: 'g-name', type: 'button', title: t('app.details'),
+        on: { click: function (e) { e.stopPropagation(); if (o.onGroup) o.onGroup(g); } }
+      }, h('i', { class: 'dot', style: { background: g.color } }), D.text(g.label));
+      td.appendChild(tg); td.appendChild(nm);
+      tr.appendChild(td);
+      tr.appendChild(h('td', { class: 'r num' }, U.fmtNum(g.count)));
+      if (canCom) tr.appendChild(h('td', { class: 'r num' }, amount(g)));
+      tr.appendChild(h('td', { class: 'b' }, h('span', { class: 'g-note' }, closed ? (g.stages || []).length + ' ' + (S.lang === 'en' ? 'stages' : 'مرحلة') : '')));
+      tr.appendChild(h('td', { class: 'r num' }, share(g, 0)));
+      tr.setAttribute('aria-expanded', closed ? 'false' : 'true');
+      tr.setAttribute('title', t('app.toggle_group'));
+      return tr;
+    }
+    function stageRow(g, st) {
+      var empty = !st.count;
+      var tr = h('tr', { class: 'stg' + (empty ? ' empty' : ''), on: { click: function () { if (!empty && o.onStage) o.onStage(st, g); } } });
+      tr.appendChild(h('td', { class: 'l nm' }, st.label));
+      tr.appendChild(h('td', { class: 'r num' }, U.fmtNum(st.count)));
+      if (canCom) tr.appendChild(h('td', { class: 'r num v' }, empty ? '—' : amount(st)));
+      tr.appendChild(h('td', { class: 'b' }, empty ? null : bar(st, g.color)));
+      tr.appendChild(h('td', { class: 'r num pct' }, empty ? '—' : share(st, 1)));
+      return tr;
+    }
+    function render() {
+      D.clear(tbody);
+      groups.forEach(function (g) {
+        tbody.appendChild(groupRow(g));
+        if (!state[g.key]) (g.stages || []).forEach(function (st) { tbody.appendChild(stageRow(g, st)); });
+      });
+      syncAllBtn();
+    }
+    render();
+    return wrap;
   };
 
   /* ---------- نافذة تفصيل قائمة (عند النقر على مؤشر) ---------- */
