@@ -142,6 +142,9 @@
     'app.me': ['أنا', 'Me'],
     'app.team': ['الفريق', 'Team'],
     'app.tags': ['الوسوم', 'Tags'],
+    'app.core_info': ['المعلومات الأساسية', 'Essential information'],
+    'app.more_details': ['تفاصيل إضافية', 'More details'],
+    'app.optional_hint': ['اختياري — يمكن إكماله لاحقًا', 'Optional — can be completed later'],
     'app.tags_hint': ['افصل بين الوسوم بفاصلة', 'Separate tags with commas'],
     'app.more': ['المزيد', 'More'],
     'app.less': ['أقل', 'Less'],
@@ -179,6 +182,39 @@
     'nav.admin': ['إدارة النظام', 'Administration'],
 
     /* ---- تسجيل الدخول ---- */
+    /* صفحة الهبوط */
+    'lp.nav_products': ['المنتجات', 'Products'],
+    'lp.nav_contact': ['تواصل معنا', 'Contact us'],
+    /* العنوان سطران: تمهيد خفيف ثم السطر العريض — كلٌّ بوزنه وحجمه */
+    'lp.h1_lead': ['واجهتك الموحدة', 'Your unified interface'],
+    'lp.h1_main': ['للعملاء والكوادر', 'for customers and talent'],
+    'lp.lede': ['إحراز: نحرز لك صفقاتك، ونستقطب لك نخبة كفاءاتك.', 'Ihraz: we win your deals, and attract your finest talent.'],
+    /* ممكّنات المنصة — ثلاث جمل متوازية: فعل + مفعول، ثم فعل + غاية */
+    'lp.cap1': ['فرصك: من التسجيل إلى الترسية', 'Your opportunities: from logging to award'],
+    'lp.cap2': ['عملاؤك: من التواصل إلى التكامل', 'Your customers: from first contact to full integration'],
+    'lp.cap3': ['كوادرك: من الإعلان إلى التعيين', 'Your talent: from posting to hire'],
+    'lp.products_title': ['اختر منصتك', 'Choose your platform'],
+    'lp.prod_crm_name': ['إدارة العملاء والفرص', 'Customers & opportunities'],
+    'lp.prod_crm_desc': ['مسار فرص بعشرين مرحلة، من تحديد العميل المحتمل حتى تسليم المشروع لفريق التنفيذ.', 'A twenty-stage pipeline, from identifying a prospect to handing the project to delivery.'],
+    'lp.prod_crm_f1': ['مسار مراحل قابل للتهيئة وسجل تحرّك كامل', 'Configurable stages with a full movement history'],
+    'lp.prod_crm_f2': ['العروض والاعتمادات والعقود والتسليم', 'Proposals, approvals, contracts and handover'],
+    'lp.prod_crm_f3': ['سحب بيانات المنافسات من منصة اعتماد', 'Tender data capture from the Etimad portal'],
+    'lp.prod_ta_name': ['استقطاب المواهب', 'Talent acquisition'],
+    'lp.prod_ta_desc': ['متابعة الشواغر والمرشّحين ومراحل التوظيف حتى قرار التعيين.', 'Tracking vacancies, candidates and hiring stages through to the offer decision.'],
+    'lp.prod_ta_f1': ['الشواغر والمرشّحون في سجل واحد', 'Vacancies and candidates in one record'],
+    'lp.prod_ta_f2': ['مراحل التوظيف والمقابلات والتقييم', 'Hiring stages, interviews and assessment'],
+    'lp.prod_ta_f3': ['قرارات التعيين موثّقة بمن اتّخذها ومتى', 'Hiring decisions recorded with who decided and when'],
+    'lp.prod_enter': ['ادخل المنصة', 'Open the platform'],
+    'lp.prod_ta_pending': ['استقطاب المواهب — يُربط دخولها لاحقًا', 'Talent acquisition — sign-in to be linked later'],
+    'lp.tp_vacancies': ['شواغر مفتوحة', 'Open roles'],
+    'lp.tp_candidates': ['مرشّحون', 'Candidates'],
+    'lp.tp_interviews': ['مقابلات', 'Interviews'],
+    'lp.contact_title': ['تواصل معنا', 'Contact us'],
+    'lp.contact_sub': ['لطلب عرض أو تجربة المنصة، أو لتهيئتها باسم شركتك وشعارها.', 'To request a demo, or to have the platform set up under your own company name and logo.'],
+    'lp.contact_email': ['البريد الإلكتروني', 'Email'],
+    'lp.contact_phone': ['الهاتف', 'Phone'],
+    'lp.contact_place': ['المقر', 'Location'],
+    'lp.contact_pending': ['يُستكمل', 'To be provided'],
     'login.title': ['تسجيل الدخول', 'Sign in'],
     'login.email': ['البريد الإلكتروني', 'Email'],
     'login.password': ['كلمة المرور', 'Password'],
@@ -280,6 +316,8 @@
     'cu.org_info': ['بيانات المنشأة', 'Organisation information'],
     'cu.registration': ['بيانات التسجيل', 'Registration'],
     'cu.relationship': ['العلاقة', 'Relationship'],
+    'cu.g_contact': ['السجلات ووسائل التواصل', 'Registrations & contact channels'],
+    'cu.g_assessment': ['التقييم والملاحظات', 'Assessment & notes'],
     'cu.summary': ['ملخص', 'Summary'],
     'cu.duplicate_warning': ['قد يكون هذا العميل مكررًا', 'Warning: this customer may be a duplicate'],
     'cu.duplicate_of': ['يشتبه بتكراره مع', 'Possible duplicate of'],
@@ -350,6 +388,37 @@
     'op.probability_hint': ['قيمة تخطيطية قابلة للتعديل، تُحدَّث افتراضيًا مع المرحلة — وليست تنبؤًا.', 'A planning value, defaulted per stage and editable — not a certain prediction.'],
     'op.weighted': ['القيمة المرجحة', 'Weighted value'],
     'op.stage': ['المرحلة الحالية', 'Current stage'],
+    /* مسار المراحل القابل للطي */
+    'op.path_title': ['مسار المراحل', 'Stage path'],
+    'op.path_expand': ['عرض كل المراحل', 'Show all stages'],
+    'op.path_collapse': ['طيّ المسار', 'Collapse path'],
+    'op.path_next': ['التالية', 'Next'],
+    'op.path_position': ['المرحلة {n} من {m}', 'Stage {n} of {m}'],
+    'op.path_guide': ['ماذا يُطلب منك في هذه المرحلة', 'What this stage requires'],
+    'op.path_req_fields': ['حقول يجب تعبئتها قبل الدخول', 'Fields required before entering'],
+    'op.path_no_req': ['لا حقول إضافية مطلوبة', 'No additional fields required'],
+    'op.path_ref_days': ['المدة المرجعية', 'Reference duration'],
+    'op.path_days': ['{n} يومًا', '{n} days'],
+    'op.path_prob': ['الاحتمالية الافتراضية', 'Default probability'],
+    'op.path_needs_reason': ['يلزم تسجيل سبب', 'A reason is required'],
+    'op.path_no_reason': ['لا يلزم سبب', 'No reason required'],
+    'op.path_move_here': ['نقل الفرصة إلى هذه المرحلة', 'Move opportunity to this stage'],
+    'op.path_st_done': ['مرحلة مُنجزة', 'Completed stage'],
+    'op.path_st_current': ['المرحلة الحالية', 'Current stage'],
+    'op.path_st_next': ['المرحلة التالية', 'Next stage'],
+    'op.path_st_future': ['مرحلة مستقبلية', 'Upcoming stage'],
+    'op.path_ahead': ['تبعد {c} عن وضعك الحالي', '{c} ahead of you'],
+    'op.n_stages_1': ['مرحلة واحدة', 'one stage'],
+    'op.n_stages_2': ['مرحلتين', 'two stages'],
+    'op.n_stages_few': ['{n} مراحل', '{n} stages'],
+    'op.n_stages_many': ['{n} مرحلة', '{n} stages'],
+    'op.stage_skips': ['هذا النقل يَعُدّ {c} بينهما منجزة: {list}', 'This move marks {c} in between as completed: {list}'],
+    'op.stage_skips_note': ['نُقلت الفرصة من «{from}» إلى «{to}» مباشرة، فعُدّت المراحل التالية منجزة: {list}', 'Moved directly from “{from}” to “{to}”; the following stages were counted as completed: {list}'],
+    'op.path_no_perm': ['لا تملك صلاحية تغيير مرحلة هذه الفرصة', 'You do not have permission to change this opportunity’s stage'],
+    'op.path_closed_move': ['الفرصة مغلقة — أعِد فتحها من زر «تغيير المرحلة»', 'Opportunity is closed — reopen it from the “Change stage” button'],
+    'op.path_behind': ['مرحلة سابقة — الرجوع إليها يستلزم تسجيل سبب', 'Earlier stage — moving back requires a reason'],
+    'op.path_closed': ['الفرصة مغلقة — المسار معروض للاطّلاع', 'Opportunity closed — path shown for reference'],
+    'op.path_parked': ['الفرصة معلّقة — المسار معروض للاطّلاع', 'Opportunity on hold — path shown for reference'],
     'op.stage_entered': ['تاريخ دخول المرحلة', 'Stage entry date'],
     'op.days_in_stage': ['أيام في المرحلة', 'Days in stage'],
     'op.expected_award': ['تاريخ الترسية المتوقع', 'Expected award date'],
@@ -368,6 +437,25 @@
     'op.main_contact': ['جهة الاتصال الرئيسية', 'Main contact'],
     'op.commercial': ['البيانات التجارية', 'Commercial data'],
     'op.tender_terms': ['شروط المنافسة والعقد', 'Tender & contract terms'],
+    'op.g_details': ['تفاصيل الفرصة والموقع', 'Opportunity & location details'],
+    'op.g_team': ['الفريق والأولوية والمخاطر', 'Team, priority & risk'],
+    'op.g_dates': ['المواعيد والخطوة التالية', 'Dates & next action'],
+    'op.etimad_title': ['سحب من منصة اعتماد', 'Import from Etimad'],
+    'op.etimad_hint': ['افتح صفحة «تفاصيل المنافسة» في اعتماد، حدّد الصفحة كاملة (Cmd+A) وانسخها (Cmd+C)، ثم الصقها هنا واضغط «سحب البيانات».', 'Open the tender details page on Etimad, select all (Cmd+A) and copy (Cmd+C), then paste it here and press “Pull data”.'],
+    'op.etimad_paste': ['الصق محتوى صفحة المنافسة', 'Paste the tender page content'],
+    'op.etimad_pull': ['سحب البيانات', 'Pull data'],
+    'op.etimad_clear': ['مسح', 'Clear'],
+    'op.etimad_url_only': ['لصقت رابط المنافسة. منصة اعتماد تحجب السحب الآلي من الرابط بصفحة تحقّق، فافتح الرابط في المتصفح وانسخ محتوى الصفحة كاملًا والصقه هنا.', 'You pasted the tender link. Etimad blocks automated fetching with a verification page, so open the link in your browser, copy the whole page content, and paste it here.'],
+    'op.etimad_not_recognized': ['لم يُعثر على بيانات منافسة في ما لُصق. تأكد أنك نسخت صفحة «تفاصيل المنافسة» كاملة.', 'No tender data found in what was pasted. Make sure you copied the full tender details page.'],
+    'op.etimad_filled': ['عُبّئ {n} حقلًا — راجعها قبل الحفظ', '{n} fields filled — review before saving'],
+    'op.etimad_agency': ['الجهة الحكومية', 'Government agency'],
+    'op.etimad_agency_matched': ['طُوبقت بالعميل المسجّل', 'Matched to an existing customer'],
+    'op.etimad_agency_new': ['غير مسجّلة كعميل', 'Not registered as a customer'],
+    'op.etimad_reopen': ['لصق نص آخر', 'Paste another page'],
+    'op.etimad_done': ['تمّت قراءة صفحة المنافسة', 'Tender page read'],
+    'op.etimad_create_customer': ['إنشاء العميل', 'Create customer'],
+    'op.etimad_doc_fee_warn': ['«قيمة المنافسة» في اعتماد ({v} ر.س) هي ثمن كراسة الشروط لا القيمة التقديرية للمشروع؛ أُدرجت في الملاحظات ولم تُسند إلى القيمة التقديرية.', 'The “tender value” on Etimad ({v} SAR) is the document price, not the project estimate; it was added to the notes and not used as the estimated value.'],
+    'op.stage_needs': ['هذه المرحلة تتطلّب لاحقًا: {fields}', 'This stage will later require: {fields}'],
     'op.bid_bond': ['ضمان ابتدائي مطلوب', 'Bid bond required'],
     'op.bid_bond_pct': ['نسبة الضمان الابتدائي (%)', 'Bid bond %'],
     'op.expected_start': ['تاريخ البدء المتوقع', 'Expected commencement'],
@@ -620,6 +708,35 @@
     'oc.customers_prep': ['عملاء يحتاجون تحضيرًا', 'Customers needing preparation'],
     'oc.templates': ['قوالب المناسبات', 'Occasion templates'],
 
+    /* ---- بطاقات المناسبات ورسائل البريد ---- */
+    'oc.cards': ['بطاقات المناسبات', 'Occasion cards'],
+    'oc.cards_sub': ['تصاميم جاهزة تحمل هوية المنصة، ويُكتب عليها اسم الجهة المستقبِلة عند التجهيز', 'Ready designs carrying the platform identity; the recipient organisation name is printed on each card'],
+    'oc.card_design': ['تصميم البطاقة', 'Card design'],
+    'oc.card_none': ['بدون بطاقة', 'No card'],
+    'oc.card_open': ['عرض بالحجم الكامل', 'View full size'],
+    'oc.card_download': ['تنزيل الصورة', 'Download image'],
+    'oc.card_sample_to': ['شركة نموذجية للمقاولات', 'Sample Contracting Company'],
+    'oc.card_for': ['تُكتب على البطاقة اسم كل جهة على حدة', 'Each card is printed with its own recipient name'],
+    'oc.card_mismatch': ['تنبيه: التصميم المختار لمناسبة أخرى ({occ}). تأكّد أنه المقصود قبل التوليد.', 'Warning: the selected design belongs to a different occasion ({occ}). Confirm before generating.'],
+    'oc.prepare_emails': ['تجهيز رسائل البريد', 'Prepare email drafts'],
+    'oc.prepare_emails_sub': ['بطاقة باسم كل جهة داخل نص رسالة جاهزة، تُفتح في برنامج البريد ويرسلها الموظف بنفسه', 'A card bearing each organisation name inside a ready draft, opened in the mail app and sent by the employee'],
+    'oc.no_send_note': ['المنصة لا ترسل بريدًا ولا تتصل بأي مزوّد. تُنتَج ملفات مسودّات فقط، والإرسال يبقى قرارًا بشريًا يُسجَّل بعده هنا.', 'The platform does not send mail and connects to no provider. It produces draft files only; sending stays a human action, recorded here afterwards.'],
+    'oc.email_subject': ['عنوان الرسالة', 'Email subject'],
+    'oc.email_salutation': ['صيغة التحية', 'Salutation'],
+    'oc.email_signature': ['التوقيع', 'Signature'],
+    'oc.email_from': ['بريد المرسِل (اختياري)', 'Sender address (optional)'],
+    'oc.placeholders_hint': ['{contact} يُستبدل باسم جهة الاتصال، و{customer} باسم الجهة', '{contact} is replaced by the contact name, {customer} by the organisation'],
+    'oc.attach_cards': ['إرفاق صور البطاقات منفصلة في الحزمة', 'Include the card images separately in the package'],
+    'oc.generate_package': ['توليد الحزمة', 'Generate package'],
+    'oc.generating': ['جارٍ التجهيز… {n} من {t}', 'Preparing… {n} of {t}'],
+    'oc.emails_ready': ['تم تجهيز {n} رسالة', '{n} drafts prepared'],
+    'oc.no_email_recipients': ['لا يوجد بين المستلمين المُدرجين من له بريد إلكتروني.', 'None of the included recipients has an email address.'],
+    'oc.pick_design_first': ['اختر تصميم البطاقة أولًا من بيانات الحملة.', 'Select a card design first in the campaign details.'],
+    'oc.eml_note': ['يفتح Outlook الملف كمسودّة جاهزة للإرسال. في بريد macOS افتح الملف ثم اختر «تحرير كرسالة جديدة».', 'Outlook opens the file as a ready draft. In macOS Mail, open the file then choose “Edit as New Message”.'],
+    'oc.package_contents': ['تحتوي الحزمة على ملف رسالة لكل مستلم، وكشف المستلمين، وملف تعليمات.', 'The package contains one draft per recipient, the recipient list, and an instructions file.'],
+    'oc.card_render_failed': ['تعذّر توليد صورة البطاقة في هذا المتصفح.', 'The card image could not be generated in this browser.'],
+    'oc.recipients_with_email': ['{n} مستلم لديه بريد', '{n} recipients with email'],
+
     /* ---- التقارير ---- */
     'rp.title': ['التقارير والتحليل', 'Reports & analysis'],
     'rp.sub': ['تحليل المسار والأداء بحسب الفترة، مع إمكانية التصدير', 'Pipeline and performance analysis by period, exportable'],
@@ -709,6 +826,7 @@
     'ad.dup_reason_name': ['تشابه الاسم', 'Similar name'],
     'ad.dup_reason_email': ['تطابق البريد الإلكتروني', 'Same email'],
     'ad.dup_reason_phone': ['تطابق الهاتف', 'Same phone'],
+    'ad.xlsx_missing': ['مكتبة قراءة ملفات Excel غير محمّلة في هذه النسخة — استعمل النسخة الكاملة للاستيراد.', 'The Excel reader is not loaded in this build — use the full deployment to import.'],
     'ad.import_title': ['استيراد من قالب Excel معتمد', 'Import from approved Excel template'],
     'ad.import_module': ['نوع البيانات', 'Data type'],
     'ad.import_file': ['الملف', 'File'],
@@ -736,6 +854,23 @@
     'ad.approval_reject': ['رفض', 'Reject'],
     'ad.approval_reason': ['مبرر القرار', 'Decision notes'],
     'ad.approval_none': ['لا توجد طلبات اعتماد', 'No requests'],
+    'ad.approval_open': ['مراجعة', 'Review'],
+    'ad.approval_review': ['مراجعة طلب اعتماد', 'Review approval request'],
+    'ad.approval_summary': ['ملخّص الطلب', 'Request summary'],
+    'ad.approval_record': ['السجل المرتبط', 'Linked record'],
+    'ad.approval_payload': ['تفاصيل الطلب', 'Request details'],
+    'ad.approval_note': ['ملاحظة القرار', 'Decision note'],
+    'ad.approval_note_hint': ['تُحفظ مع القرار وتظهر لمقدّم الطلب وفي سجل التدقيق. إلزامية عند الرفض.', 'Saved with the decision, visible to the requester and in the audit log. Required when rejecting.'],
+    'ad.approval_decision': ['القرار الصادر', 'Decision taken'],
+    'ad.approval_decided_by': ['صاحب القرار', 'Decided by'],
+    'ad.approval_module': ['الشاشة', 'Screen'],
+    'ad.approval_rows': ['عدد السجلات', 'Row count'],
+    'ad.approval_filters': ['عوامل التصفية المطبّقة', 'Applied filters'],
+    'ad.approval_no_filters': ['بلا تصفية — كل السجلات المتاحة لمقدّم الطلب', 'No filter — all records available to the requester'],
+    'ad.approval_self': ['لا يمكنك البتّ في طلب قدّمته بنفسك', 'You cannot decide a request you submitted yourself'],
+    'ad.approval_waiting_roles': ['بانتظار قرار: {roles}', 'Awaiting decision by: {roles}'],
+    'ad.approval_occasion': ['المناسبة', 'Occasion'],
+    'ad.approval_recipients': ['عدد المستلمين', 'Recipients'],
     'ad.action.create': ['إنشاء', 'Create'],
     'ad.action.update': ['تعديل', 'Update'],
     'ad.action.archive': ['أرشفة', 'Archive'],
@@ -760,11 +895,28 @@
     'ad.action.reopen': ['إعادة فتح', 'Reopened']
   };
 
+  /* مفاتيح تسميات الحقول المستعملة خارج النماذج */
+  var FIELD_LABEL = {
+    estimated_value: 'op.est_value', project_type: 'op.project_type',
+    submission_deadline: 'op.deadline', expected_award_date: 'op.expected_award',
+    loss_reason: 'op.loss_reason', customer_id: 'app.customer', name: 'op.name',
+    owner_id: 'op.owner', stage: 'app.stage', name_ar: 'cu.name_ar', full_name: 'ct.full_name'
+  };
+
   var I18N = {
     lang: 'ar',
     missing: {},
     dict: D,
     set: function (lang) { I18N.lang = lang === 'en' ? 'en' : 'ar'; },
+    /* صيغة العدد في العربية تتغيّر بتغيّر العدد: مفرد، مثنّى، جمع قلّة (٣-١٠)،
+       ثم مفرد مجرور بعد العشرة. تُستعمل مع مفاتيح base_1 / _2 / _few / _many. */
+    plural: function (base, n) {
+      var k = n === 1 ? base + '_1' : n === 2 ? base + '_2' : (n >= 3 && n <= 10) ? base + '_few' : base + '_many';
+      return I18N.has(k) ? I18N.t(k, { n: n }) : I18N.t(base, { n: n });
+    },
+    /* تسمية حقل من مفتاحه — حيث لا يوجد نموذج مبنيّ يُقرأ منه العنوان
+       (نافذة شرح المرحلة). اختبار STAGES يتحقّق من تغطية كل required_fields. */
+    field: function (key) { return FIELD_LABEL[key] ? I18N.t(FIELD_LABEL[key]) : key; },
     t: function (key, params) {
       var e = D[key];
       var s;
@@ -786,4 +938,6 @@
   };
   root.I18N = I18N;
   root.t = I18N.t;
+  root.tf = I18N.field;
+  root.tp = I18N.plural;
 })(typeof window !== 'undefined' ? window : globalThis);

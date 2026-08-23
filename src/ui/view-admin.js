@@ -3,7 +3,7 @@
    ===================================================================== */
 (function (root) {
   'use strict';
-  var D = root.DOM, h = D.h, U = root.U, S = root.STORE, UI = root.UI, t = root.t, L = root.LOOKUPS, ENGINE = root.ENGINE, STAGES = root.STAGES, MODEL = root.MODEL, PERMS = root.PERMS, PC = root.PERMISSIONS_CONFIG, RULES = root.RULES, IMPORTER = root.IMPORTER, F = root.FORMS;
+  var D = root.DOM, h = D.h, U = root.U, S = root.STORE, UI = root.UI, t = root.t, L = root.LOOKUPS, ENGINE = root.ENGINE, STAGES = root.STAGES, MODEL = root.MODEL, PERMS = root.PERMS, PC = root.PERMISSIONS_CONFIG, RULES = root.RULES, IMPORTER = root.IMPORTER, F = root.FORMS, OCC = root.OCCASIONS_CONFIG;
   root.VIEWS = root.VIEWS || {};
 
   root.VIEWS.admin = {
@@ -45,14 +45,143 @@
         { key: 'payload', label: t('app.details'), width: 2, wrap: true, get: function (a) { var p = a.payload || {}; var parts = []; if (p.value !== undefined && p.value !== null && S.can('commercial.view')) parts.push(t('app.value') + ': ' + S.money(p.value)); if (p.discount_pct) parts.push(t('pr.discount') + ': ' + p.discount_pct + '%'); if (p.recipients) parts.push(t('oc.recipients') + ': ' + p.recipients); if (p.module) parts.push(p.module + (p.count ? ' · ' + p.count : '')); return parts.join(' · ') || '—'; } },
         { key: 'by', label: t('ad.approval_requested_by'), width: 1.4, get: function (a) { return h('span', null, S.userName(a.requested_by), h('span', { class: 'sub' }, S.dateTime(a.requested_at))); } },
         { key: 'status', label: t('app.status'), width: 1, get: function (a) { return UI.lookupChip('approval_statuses', a.status, 'sm'); } },
-        { key: 'dec', label: t('ad.approval_decide'), width: 1.8, get: function (a) { if (a.status !== 'pending') return a.decided_by ? h('span', null, S.userName(a.decided_by), h('span', { class: 'sub' }, S.dateTime(a.decided_at) + (a.reason ? ' · ' + a.reason : ''))) : null; if (!decidable) return h('span', { class: 'muted small' }, t('app.needs_approval_by', { roles: PERMS.approverRoles(a.type).map(S.roleLabel).join('/') })); return h('span', { class: 'row-actions' }, h('button', { class: 'btn xs primary', type: 'button', on: { click: function () { decide(a, 'approved'); } } }, t('ad.approval_approve')), h('button', { class: 'btn xs danger', type: 'button', on: { click: function () { decide(a, 'rejected'); } } }, t('ad.approval_reject'))); } }
+        { key: 'dec', label: t('ad.approval_decide'), width: 1.8, get: function (a) {
+          if (a.status !== 'pending') {
+            return h('span', { class: 'row-actions' },
+              h('button', { class: 'btn xs', type: 'button', on: { click: function () { review(a); } } }, t('ad.approval_open')),
+              a.decided_by ? h('span', { class: 'sub' }, S.userName(a.decided_by) + ' · ' + S.dateTime(a.decided_at)) : null);
+          }
+          /* القرار لا يُتخذ من الجدول: يمرّ عبر نافذة المراجعة */
+          return h('span', { class: 'row-actions' },
+            h('button', { class: 'btn xs ' + (decidable ? 'primary' : ''), type: 'button', on: { click: function () { review(a); } } }, t('ad.approval_open')),
+            decidable ? null : h('span', { class: 'muted small' }, t('ad.approval_waiting_roles', { roles: PERMS.approverRoles(a.type).map(S.roleLabel).join('/') })));
+        } }
       ];
     }
-    function decide(a, decision) { UI.formModal({ title: (decision === 'approved' ? t('ad.approval_approve') : t('ad.approval_reject')) + ' — ' + S.label('approval_types', a.type), size: 'sm', cols: 1, fields: [{ key: 'reason', label: t('ad.approval_reason'), type: 'textarea', required: decision === 'rejected' }], values: {}, saveLabel: decision === 'approved' ? t('ad.approval_approve') : t('ad.approval_reject'), onSubmit: function (v) { return S.adapter.decideApproval(a.id, decision, v.reason).then(function () { return root.APP.rerender(); }); } }); }
-    pane.appendChild(UI.card({ title: t('mw.approvals_inbox'), sub: mineToDecide.length + ' ' + t('app.in_review'), tight: true, body: UI.table({ columns: cols(true), rows: U.sortBy(mineToDecide, 'requested_at', 'desc'), empty: t('ad.approval_none') }) }));
+    /* ---------- نافذة مراجعة الطلب ---------- */
+    function moduleLabel(m) { return root.I18N.has('nav.' + m) ? t('nav.' + m) : (root.I18N.has('ad.imp_' + m) ? t('ad.imp_' + m) : m); }
+    function filtersText(f) {
+      if (!f || typeof f !== 'object') return t('ad.approval_no_filters');
+      var parts = [];
+      Object.keys(f).forEach(function (k) {
+        var v = f[k];
+        if (v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length)) return;
+        parts.push((root.I18N.has('app.' + k) ? t('app.' + k) : k) + ': ' + (Array.isArray(v) ? v.join('، ') : String(v)));
+      });
+      return parts.length ? parts.join(' · ') : t('ad.approval_no_filters');
+    }
+    /* يحوّل حمولة الطلب إلى أسطر مقروءة حسب نوعه */
+    function payloadRows(a) {
+      var p = a.payload || {}, rows = [], shown = { action: 1 };
+      function put(k, label, val) { shown[k] = 1; if (val !== null && val !== undefined && val !== '') rows.push([label, val]); }
+      if (a.type === 'data_export') {
+        put('module', t('ad.approval_module'), moduleLabel(p.module || a.entity_type));
+        put('count', t('ad.approval_rows'), p.count === undefined ? null : String(p.count));
+        put('filters', t('ad.approval_filters'), filtersText(p.filters));
+      } else if (a.type === 'bulk_greeting') {
+        put('occasion', t('ad.approval_occasion'), p.occasion && OCC ? OCC.label(p.occasion, S.lang) : p.occasion);
+        put('recipients', t('ad.approval_recipients'), p.recipients === undefined ? null : String(p.recipients));
+        put('year', t('oc.year'), p.year === undefined ? null : String(p.year));
+      }
+      if (p.value !== undefined && p.value !== null) {
+        shown.value = 1;
+        rows.push([t('app.value'), S.can('commercial.view') ? S.money(p.value) : UI.lockNote()]);
+      }
+      if (p.discount_pct !== undefined && p.discount_pct !== null) { shown.discount_pct = 1; rows.push([t('pr.discount'), p.discount_pct + '%']); }
+      if (p.version_no) { shown.version_no = 1; rows.push([t('app.version'), 'v' + p.version_no]); }
+      /* أي مفاتيح أخرى تُعرض كما هي حتى لا تختفي معلومة عن المراجِع */
+      Object.keys(p).forEach(function (k) {
+        if (shown[k]) return;
+        var v = p[k];
+        if (v === null || v === undefined || v === '' || typeof v === 'object') return;
+        rows.push([root.I18N.has('app.' + k) ? t('app.' + k) : k, String(v)]);
+      });
+      return rows;
+    }
+    function recordSummary(a) {
+      var e = a.entity_type, id = a.entity_id, line = null;
+      if (e === 'proposal') {
+        var pr = S.get('proposal', id);
+        if (pr) {
+          var op = pr.opportunity_id ? S.get('opportunity', pr.opportunity_id) : null;
+          line = [op ? S.customerName(op.customer_id) : null, op ? op.name : pr.opportunity_id].filter(Boolean).join(' · ');
+        }
+      }
+      else if (e === 'contract') { var ct = S.get('contract', id); if (ct) line = S.customerName(ct.customer_id); }
+      else if (e === 'campaign') { var cm = S.get('campaign', id); if (cm) line = cm.title; }
+      else if (e === 'customer') { line = S.customerName(id); }
+      return line;
+    }
+    function review(a) {
+      var decidable = a.status === 'pending' && PERMS.canDecide(S.user, a.type);
+      var isMine = a.requested_by === S.user.id;
+      var canAct = decidable && (!isMine || S.user.role === 'system_admin');
+
+      var m = null;
+      var body = h('div', { class: 'apr' });
+      body.appendChild(UI.secHead('', t('ad.approval_summary'), ''));
+      body.appendChild(UI.kv([
+        [t('ad.approval_type'), S.label('approval_types', a.type)],
+        [t('app.status'), UI.lookupChip('approval_statuses', a.status, 'sm')],
+        [t('ad.approval_requested_by'), S.userName(a.requested_by) + ' · ' + S.dateTime(a.requested_at)]
+      ]));
+
+      var known = ['proposal', 'contract', 'campaign', 'customer', 'opportunity'].indexOf(a.entity_type) >= 0 && a.entity_id !== 'list';
+      if (known) {
+        var recLine = recordSummary(a);
+        var link = UI.recordLink(a.entity_type, a.entity_id);
+        /* فتح السجل يغلق النافذة حتى لا تبقى فوق الصفحة الجديدة */
+        link.addEventListener('click', function () { if (m) m.close(true); });
+        body.appendChild(UI.secHead('', t('ad.approval_record'), ''));
+        body.appendChild(UI.kv([[t('ad.approval_entity'),
+          h('span', null, link, recLine ? h('span', { class: 'sub' }, recLine) : null)]]));
+      }
+
+      var pr = payloadRows(a);
+      if (pr.length) { body.appendChild(UI.secHead('', t('ad.approval_payload'), '')); body.appendChild(UI.kv(pr)); }
+
+      if (a.status !== 'pending') {
+        body.appendChild(UI.secHead('', t('ad.approval_decision'), ''));
+        body.appendChild(UI.kv([
+          [t('app.status'), UI.lookupChip('approval_statuses', a.status, 'sm')],
+          [t('ad.approval_decided_by'), a.decided_by ? S.userName(a.decided_by) + ' · ' + S.dateTime(a.decided_at) : '—'],
+          [t('ad.approval_note'), a.reason || '—']
+        ]));
+      }
+
+      var note = null, buttons = [];
+      if (a.status === 'pending') {
+        if (canAct) {
+          body.appendChild(UI.secHead('', t('ad.approval_note'), ''));
+          note = h('textarea', { class: 'ctl', rows: 3 });
+          body.appendChild(h('div', { class: 'field' }, note, h('div', { class: 'hint' }, t('ad.approval_note_hint'))));
+        } else {
+          body.appendChild(UI.warnBox(isMine ? t('ad.approval_self')
+            : t('ad.approval_waiting_roles', { roles: PERMS.approverRoles(a.type).map(S.roleLabel).join('/') })));
+        }
+      }
+
+      function submit(decision) {
+        var reason = note ? note.value.trim() : '';
+        if (decision === 'rejected' && !reason) { UI.toast(t('app.reason_required'), 'warn'); note.focus(); return; }
+        buttons.forEach(function (b) { b.disabled = true; });
+        S.adapter.decideApproval(a.id, decision, reason)
+          .then(function () { m.close(true); return root.APP.rerender(); })
+          .then(function () { UI.toast(decision === 'approved' ? t('ad.approval_approve') + ' ✓' : t('ad.approval_reject') + ' ✓', decision === 'approved' ? 'ok' : 'warn'); })
+          .catch(function (e) { buttons.forEach(function (b) { b.disabled = false; }); UI.errorToast(e); });
+      }
+      if (canAct) {
+        buttons.push(h('button', { class: 'btn primary', type: 'button', on: { click: function () { submit('approved'); } } }, t('ad.approval_approve')));
+        buttons.push(h('button', { class: 'btn danger', type: 'button', on: { click: function () { submit('rejected'); } } }, t('ad.approval_reject')));
+      }
+      buttons.push(h('button', { class: 'btn', type: 'button', on: { click: function () { m.close(true); } } }, t('app.close')));
+      m = UI.modal({ title: t('ad.approval_review') + ' — ' + S.label('approval_types', a.type), sub: a.id, size: 'md', body: [body], buttons: buttons });
+      return m;
+    }
+    pane.appendChild(UI.card({ title: t('mw.approvals_inbox'), sub: mineToDecide.length + ' ' + t('app.in_review'), tight: true, body: UI.table({ columns: cols(true), rows: U.sortBy(mineToDecide, 'requested_at', 'desc'), empty: t('ad.approval_none'), onRow: review }) }));
     pane.appendChild(h('div', { style: { height: '12px' } }));
-    pane.appendChild(UI.card({ title: S.lang === 'en' ? 'My requests' : 'طلباتي', tight: true, body: UI.table({ columns: cols(false), rows: U.sortBy(myRequests, 'requested_at', 'desc'), empty: t('ad.approval_none') }) }));
-    if (S.can('audit.view')) { pane.appendChild(h('div', { style: { height: '12px' } })); pane.appendChild(UI.card({ title: S.lang === 'en' ? 'All other requests' : 'بقية الطلبات', tight: true, body: UI.table({ columns: cols(false), rows: U.sortBy(others, 'requested_at', 'desc').slice(0, 100), empty: t('ad.approval_none') }) })); }
+    pane.appendChild(UI.card({ title: S.lang === 'en' ? 'My requests' : 'طلباتي', tight: true, body: UI.table({ columns: cols(false), rows: U.sortBy(myRequests, 'requested_at', 'desc'), empty: t('ad.approval_none'), onRow: review }) }));
+    if (S.can('audit.view')) { pane.appendChild(h('div', { style: { height: '12px' } })); pane.appendChild(UI.card({ title: S.lang === 'en' ? 'All other requests' : 'بقية الطلبات', tight: true, body: UI.table({ columns: cols(false), rows: U.sortBy(others, 'requested_at', 'desc').slice(0, 100), empty: t('ad.approval_none'), onRow: review }) })); }
   };
 
   /* ---------- المستخدمون ---------- */
@@ -204,6 +333,8 @@
       var reader = new FileReader();
       reader.onload = function (e) {
         try {
+          /* المكتبة مضمّنة محليًا؛ إن غابت (نسخة مصغّرة) نُبلّغ بوضوح بدل رمي خطأ غامض */
+          if (!root.XLSX) { D.clear(result); result.appendChild(UI.errorBox(t('ad.xlsx_missing'))); return; }
           var wb = root.XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellFormula: false, cellHTML: false, cellNF: false, bookVBA: false });
           var ws = wb.Sheets[wb.SheetNames[0]];
           var rows = root.XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });

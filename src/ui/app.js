@@ -21,44 +21,161 @@
     document.title = (S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar) + ' — ' + (S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar);
   }
 
-  /* ---------- شاشة الدخول ---------- */
-  function renderLogin(rootEl, err) {
-    D.clear(rootEl);
+  /* ---------- شاشة الدخول ----------
+     صفحة هبوط بواجهة واحدة: العلامة يمينًا، واللغة وزر الدخول يسارًا،
+     والرسالة والمعاينة في الوسط. نموذج الدخول يُفتح في نافذة عند الطلب
+     فلا يشغل نصف الشاشة قبل أن يحتاجه أحد. */
+  function loginModal(rootEl, initialErr) {
     var demoMode = S.mode === 'local';
-    var lmark = UI.brandMark(46, 'on-dark');
-    var side = h('div', { class: 'side' }, h('div', { class: 'brand lg' }, lmark, h('div', { class: 'titles' },
-        h('span', { class: 'name', style: { color: '#fff' } }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar),
-        h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar))),
-      h('h1', null, S.lang === 'en' ? 'Ihraz drives every opportunity to a decision.' : 'إحراز يقود كل فرصة إلى قرار.'),
-      h('p', null, S.lang === 'en' ? 'From first contact to award, loss or closure — with a clear next action, a firm date, and a full audit trail of every change.' : 'من أول تواصل حتى الترسية أو الخسارة أو الإقفال — بإجراء تالٍ واضح، وموعد مضبوط، وسجل تدقيق كامل لكل تغيير.'),
-      h('ul', null,
-        h('li', null, S.lang === 'en' ? 'Customers, contacts and the relationship owner in one record' : 'العملاء وجهات الاتصال ومسؤول العلاقة في سجل واحد'),
-        h('li', null, S.lang === 'en' ? 'An opportunity pipeline with configurable stages and full history' : 'مسار فرص بمراحل قابلة للتهيئة وسجل تحرّك كامل'),
-        h('li', null, S.lang === 'en' ? 'Proposals, approvals, contracts and handover to delivery' : 'العروض والاعتمادات والعقود والتسليم لفريق التنفيذ'),
-        h('li', null, S.lang === 'en' ? 'Role-based access enforced on the server, not in the interface' : 'صلاحيات حسب الدور تُفرض على الخادم لا على الواجهة')),
-      h('p', { class: 'small', style: { marginTop: 'auto', opacity: .7 } }, (S.lang === 'en' ? CFG.platform.classification_en : CFG.platform.classification_ar) + ' · v' + CFG.platform.version));
-    var pane = h('div', { class: 'pane' });
-    var top = h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } }, h('h2', { style: { flex: 1 } }, demoMode ? t('login.demo_title') : t('login.title')), h('button', { class: 'langbtn', type: 'button', on: { click: function () { S.setLang(S.lang === 'ar' ? 'en' : 'ar'); renderLogin(rootEl); } } }, t('app.lang_toggle')));
-    pane.appendChild(top);
-    if (err) pane.appendChild(UI.errorBox(err));
+    var m = UI.modal({ title: demoMode ? t('login.demo_title') : t('login.title'), size: 'sm' });
+    var msg = h('div', { class: 'login-msg' });
+    m.body.appendChild(msg);
+    function fail(e) {
+      D.clear(msg);
+      msg.appendChild(UI.errorBox(e && e.code === 'no_profile' ? t('login.no_profile')
+        : (e && e.code === 'inactive' ? t('login.inactive') : t('login.failed'))));
+    }
+    if (initialErr) msg.appendChild(UI.errorBox(initialErr));
+
     if (demoMode) {
-      pane.appendChild(h('p', { class: 'muted small' }, t('login.demo_hint')));
+      m.body.appendChild(h('p', { class: 'muted small' }, t('login.demo_hint')));
       var grid = h('div', { class: 'demo-users' });
       S.adapter.users().then(function (users) {
         users.filter(function (u) { return u.active !== false; }).forEach(function (u) {
-          var b = h('button', { type: 'button', on: { click: function () { S.adapter.signInAs(u.id).then(function (usr) { APP.afterLogin(usr); }).catch(function (e) { renderLogin(rootEl, t('login.failed')); }); } } }, h('span', { class: 'avatar' }, U.initials(S.lang === 'en' ? (u.name_en || u.name_ar) : (u.name_ar || u.name_en))), h('span', null, h('div', { class: 'nm' }, S.lang === 'en' ? (u.name_en || u.name_ar) : (u.name_ar || u.name_en)), h('div', { class: 'rl' }, PERMS.roleLabel(u.role, S.lang))));
-          grid.appendChild(b);
+          var nm = S.lang === 'en' ? (u.name_en || u.name_ar) : (u.name_ar || u.name_en);
+          grid.appendChild(h('button', { type: 'button', on: { click: function () {
+            S.adapter.signInAs(u.id).then(function (usr) { m.close(true); APP.afterLogin(usr); }).catch(fail);
+          } } }, h('span', { class: 'avatar' }, U.initials(nm)),
+            h('span', null, h('div', { class: 'nm' }, nm), h('div', { class: 'rl' }, PERMS.roleLabel(u.role, S.lang)))));
         });
       });
-      pane.appendChild(grid);
+      m.body.appendChild(grid);
     } else {
-      var form = UI.form({ cols: 1, fields: [{ key: 'email', label: t('login.email'), type: 'email', required: true }, { key: 'password', label: t('login.password'), type: 'password', required: true }] });
-      var pw = form.fields.password.ctl; pw.type = 'password';
-      var btn = h('button', { class: 'btn primary block', type: 'button', on: { click: function () { var e = form.validate(); if (Object.keys(e).length) { form.setErrors(e); return; } btn.disabled = true; var v = form.values(); S.adapter.signIn(v.email, v.password).then(function (usr) { APP.afterLogin(usr); }).catch(function (er) { btn.disabled = false; renderLogin(rootEl, er && er.code === 'no_profile' ? t('login.no_profile') : (er && er.code === 'inactive' ? t('login.inactive') : t('login.failed'))); }); } } }, t('login.submit'));
+      var form = UI.form({ cols: 1, fields: [
+        { key: 'email', label: t('login.email'), type: 'email', required: true },
+        { key: 'password', label: t('login.password'), type: 'password', required: true }] });
+      form.fields.password.ctl.type = 'password';
+      var btn = h('button', { class: 'btn primary block', type: 'button' }, t('login.submit'));
+      btn.addEventListener('click', function () {
+        var e = form.validate(); if (Object.keys(e).length) { form.setErrors(e); return; }
+        btn.disabled = true; D.clear(msg);
+        var v = form.values();
+        S.adapter.signIn(v.email, v.password)
+          .then(function (usr) { m.close(true); APP.afterLogin(usr); })
+          .catch(function (er) { btn.disabled = false; fail(er); });
+      });
       form.el.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
-      pane.appendChild(form.el); pane.appendChild(btn);
+      m.body.appendChild(form.el); m.body.appendChild(btn);
+      setTimeout(function () { if (form.fields.email.ctl.focus) form.fields.email.ctl.focus(); }, 30);
     }
-    rootEl.appendChild(h('div', { class: 'login-wrap' }, h('div', { class: 'login' }, side, pane)));
+    return m;
+  }
+
+  /* معاينة مصغّرة للمنصتين — عناصر الواجهة نفسها لا صورة خارجية */
+  function heroPreview(kind) {
+    function tile(label, val) { return h('div', { class: 'lp-tile' }, h('span', null, label), h('b', null, val)); }
+    function row(w1, w2, on) { return h('div', { class: 'lp-row' + (on ? ' on' : '') }, h('i', { style: { width: w1 + '%' } }), h('i', { style: { width: w2 + '%' } })); }
+    var rail = h('div', { class: 'lp-rail' });
+    for (var i = 0; i < 12; i++) rail.appendChild(h('u', { class: i < 4 ? 'done' : (i === 4 ? 'cur' : '') }));
+    var tiles = kind === 'ta'
+      ? [tile(t('lp.tp_vacancies'), '١٢'), tile(t('lp.tp_candidates'), '٢٤٨'), tile(t('lp.tp_interviews'), '٩')]
+      : [tile(t('ov.pipeline_value'), '٤١٢ م'), tile(t('ov.win_rate'), '٣٨٪'), tile(t('ov.active_opps'), '٧٠')];
+    return h('div', { class: 'lp lp-' + (kind || 'crm'), 'aria-hidden': 'true' },
+      h('div', { class: 'lp-bar' }, h('i'), h('i'), h('i')),
+      h('div', { class: 'lp-body' },
+        h('div', { class: 'lp-tiles' }, tiles),
+        rail,
+        h('div', { class: 'lp-list' }, row(52, 22, true), row(38, 30), row(64, 18), row(30, 26), row(46, 34))));
+  }
+
+  function renderLogin(rootEl, err) {
+    D.clear(rootEl);
+    var demoMode = S.mode === 'local';
+    var opened = null;
+    function openLogin(e0) { if (opened && !opened.closed) return; opened = loginModal(rootEl, e0); }
+    function jump(id) { return function (e) { e.preventDefault(); var el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; }
+
+    var top = h('div', { class: 'lh-top' },
+      h('div', { class: 'lh-brand' }, UI.brandMark(46, 'on-dark'),
+        h('div', { class: 'titles' },
+          h('span', { class: 'name' }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar),
+          h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar))),
+      h('nav', { class: 'lh-nav', 'aria-label': t('lp.nav_products') },
+        h('a', { href: '#lp-products', on: { click: jump('lp-products') } }, t('lp.nav_products')),
+        h('a', { href: '#lp-contact', on: { click: jump('lp-contact') } }, t('lp.nav_contact'))),
+      h('div', { class: 'lh-act' },
+        h('button', { class: 'lh-lang', type: 'button', on: { click: function () { S.setLang(S.lang === 'ar' ? 'en' : 'ar'); renderLogin(rootEl); } } }, t('app.lang_toggle')),
+        h('button', { class: 'lh-signin', type: 'button', on: { click: function () { openLogin(); } } }, t('login.title'))));
+
+    var copy = h('div', { class: 'lh-copy' },
+      h('h1', null, h('span', { class: 'l1' }, t('lp.h1_lead')), h('span', { class: 'l2' }, t('lp.h1_main'))),
+      h('p', null, t('lp.lede')),
+      h('ul', { class: 'lh-points' }, [['lp.cap1', 'cap_opps'], ['lp.cap2', 'cap_customers'], ['lp.cap3', 'cap_talent']]
+        .map(function (x) { return h('li', null, UI.icon(x[1]), h('span', null, t(x[0]))); })));
+
+    var hero = h('div', { class: 'lh login' }, top,
+      h('div', { class: 'lh-main' }, copy,
+        h('div', { class: 'lh-shot' },
+          h('div', { class: 'lh-stack' },
+            h('div', { class: 'lh-card back' }, heroPreview('ta')),
+            h('div', { class: 'lh-card front' }, heroPreview('crm'))))));
+
+    /* ---- المنتجات ---- */
+    function prodCard(name, desc, feats, action) {
+      return h('article', { class: 'lp-card' },
+        h('h3', null, name), h('p', null, desc),
+        h('ul', null, feats.map(function (f) { return h('li', null, t(f)); })),
+        action);
+    }
+    var products = h('section', { class: 'lp-sec', id: 'lp-products' },
+      h('div', { class: 'lp-head' }, h('h2', null, t('lp.products_title'))),
+      h('div', { class: 'lp-cards' },
+        prodCard(t('lp.prod_crm_name'), t('lp.prod_crm_desc'), ['lp.prod_crm_f1', 'lp.prod_crm_f2', 'lp.prod_crm_f3'],
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin(); } } }, t('lp.prod_enter'))),
+        prodCard(t('lp.prod_ta_name'), t('lp.prod_ta_desc'), ['lp.prod_ta_f1', 'lp.prod_ta_f2', 'lp.prod_ta_f3'],
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { UI.toast(t('lp.prod_ta_pending'), '', 3500); } } }, t('lp.prod_enter')))));
+
+    /* ---- تواصل معنا ---- */
+    function contactRow(label, val) {
+      return h('div', { class: 'lp-crow' }, h('span', null, label),
+        h('b', { class: val ? '' : 'pending' }, val || t('lp.contact_pending')));
+    }
+    var contact = h('section', { class: 'lp-sec alt', id: 'lp-contact' },
+      h('div', { class: 'lp-head' }, h('h2', null, t('lp.contact_title')), h('p', null, t('lp.contact_sub'))),
+      h('div', { class: 'lp-contact' },
+        contactRow(t('lp.contact_email'), null),
+        contactRow(t('lp.contact_phone'), null),
+        contactRow(t('lp.contact_place'), null)));
+
+    var foot = h('footer', { class: 'lp-foot' },
+      h('span', null, (S.lang === 'en' ? CFG.platform.company_en : CFG.platform.company_ar)),
+      h('span', null, 'v' + CFG.platform.version));
+
+    rootEl.appendChild(h('div', { class: 'lpage' }, hero, products, contact, foot));
+
+    /* العنوان سطران مستقلّان: يُصغَّر كلاهما معًا حتى يتّسع أعرضهما،
+       فلا يفيض ولا ينكسر أيٌّ منهما إلى سطر ثالث. */
+    var head = copy.querySelector('h1');
+    function fitHead() {
+      if (!head.isConnected) return;
+      head.style.fontSize = '';
+      var size = parseFloat(getComputedStyle(head).fontSize), guard = 0;
+      /* أعرض السطرين هو ما يحكم المقاس */
+      function widest() {
+        var w = 0;
+        [].forEach.call(head.children, function (el) {
+          var r = document.createRange(); r.selectNodeContents(el);
+          w = Math.max(w, r.getBoundingClientRect().width);
+        });
+        return w;
+      }
+      while (widest() > head.clientWidth && size > 18 && guard++ < 80) { size -= 1; head.style.fontSize = size + 'px'; }
+    }
+    fitHead();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHead);
+    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(fitHead, 120); });
+
+    if (err) openLogin(err);
   }
 
   /* ---------- الهيكل ---------- */

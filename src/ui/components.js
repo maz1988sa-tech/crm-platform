@@ -11,6 +11,12 @@
 
   /* ---------- أيقونات SVG بسيطة ---------- */
   var ICONS = {
+    /* أيقونات الممكّنات — بلغة شعار «إحراز» نفسها: شبكة ١٢×١٢، سماكة ٢،
+       طرف مستقيم ووصل مستدير، مسار رئيسي بلون النصّ ومسار أزرق منفصل
+       (الفجوة بينهما هي «القفزة» في الشعار). */
+    cap_opps: '<svg viewBox="0 0 12 12" width="24" height="24" fill="none" stroke-width="1.6" stroke-linecap="butt" stroke-linejoin="round"><path d="M1.1 9.3 5 5.4H8.7" stroke="currentColor"/><path d="M10 4.1 11.4 2.7" stroke="#4C86F2"/></svg>',
+    cap_customers: '<svg viewBox="0 0 12 12" width="24" height="24" fill="none" stroke-width="1.6" stroke-linecap="butt" stroke-linejoin="round"><path d="M1.2 4H6.2V10.3" stroke="currentColor"/><path d="M10.8 8H5.8V1.7" stroke="#4C86F2"/></svg>',
+    cap_talent: '<svg viewBox="0 0 12 12" width="24" height="24" fill="none" stroke-width="1.6" stroke-linecap="butt" stroke-linejoin="round"><path d="M1.6 5.1V10.5H10.4V5.1" stroke="currentColor"/><path d="M6 1.1V4.7" stroke="#4C86F2"/></svg>',
     search: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
     close: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     full: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>',
@@ -121,7 +127,8 @@
     var msg = t('app.error_detail');
     if (e && e.code === 'forbidden') msg = t('app.permission_denied');
     else if (e && e.code === 'stale') msg = t('app.stale_write');
-    else if (e && e.code === 'validation') msg = t('app.validation_failed') + (e.details && e.details.fields ? ': ' + e.details.fields.join('، ') : '');
+    /* أسماء الحقول لا مفاتيحها الخام — الرسالة تُقرأ من الموظف لا من المبرمج */
+    else if (e && e.code === 'validation') msg = t('app.validation_failed') + (e.details && e.details.fields ? ': ' + e.details.fields.map(function (k) { return root.tf(k); }).join('، ') : '');
     else if (e && e.code === 'invalid_transition') msg = (S.lang === 'en' ? 'Action not allowed in the current state: ' : 'الإجراء غير متاح في الحالة الحالية: ') + (e.message || '');
     else if (e && e.code === 'network') msg = t('app.offline_source');
     else if (e && e.message && e.code) msg = msg + ' (' + e.code + ')';
@@ -192,7 +199,7 @@
   };
   /* نافذة نموذج عامة: fields حسب UI.form؛ onSubmit(values, api) يعيد Promise؛ أخطاء التحقق تُعرض تحت الحقول */
   UI.formModal = function (o) {
-    var form = UI.form({ fields: o.fields, values: o.values, cols: o.cols });
+    var form = UI.form({ fields: o.fields, values: o.values, cols: o.cols, autoExpandFilled: o.autoExpandFilled, onChange: o.onChange });
     var saveBtn = h('button', { class: 'btn primary', type: 'button' }, o.saveLabel || t('app.save'));
     var cancelBtn = h('button', { class: 'btn', type: 'button' }, t('app.cancel'));
     var m = UI.modal({ title: o.title, sub: o.sub, size: o.size || '', body: [o.intro || null, form.el, o.outro || null], buttons: [saveBtn, cancelBtn], hint: o.hint || t('app.keyboard_hint'), closeOnBg: false });
@@ -280,10 +287,57 @@
     var fieldsByKey = {};
     var el = h('div', { class: 'form ' + (o.cols === 1 ? 'c1' : (o.cols === 3 ? 'c3' : '')) });
     var api = { el: el, fields: fieldsByKey };
-    function setVal(k, v) { values[k] = v; if (o.onChange) o.onChange(k, v, api); }
+    /* مجموعات قابلة للطي: الحقول التالية للمجموعة تنتمي إليها حتى المجموعة/القسم التالي */
+    var groups = {}, groupOrder = [], curGroup = null;
+    function isFilled(v) {
+      return !(v === null || v === undefined || v === '' || v === false || (Array.isArray(v) && !v.length));
+    }
+    function refreshGroupCounts() {
+      groupOrder.forEach(function (id) {
+        var g = groups[id], n = 0;
+        g.keys.forEach(function (k) { if (isFilled(values[k])) n++; });
+        g.count.textContent = n ? String(n) : '';
+        g.count.classList.toggle('on', n > 0);
+      });
+    }
+    function setGroupOpen(id, open) {
+      var g = groups[id]; if (!g) return;
+      g.open = !!open;
+      g.btn.classList.toggle('open', g.open);
+      g.btn.setAttribute('aria-expanded', g.open ? 'true' : 'false');
+      g.keys.forEach(function (k) { var f = fieldsByKey[k]; if (f) f.el.classList.toggle('gh', !g.open); });
+    }
+    function groupOfField(key) {
+      for (var i = 0; i < groupOrder.length; i++) if (groups[groupOrder[i]].keys.indexOf(key) >= 0) return groupOrder[i];
+      return null;
+    }
+    function setVal(k, v) { values[k] = v; refreshGroupCounts(); if (o.onChange) o.onChange(k, v, api); }
     function buildField(f) {
-      if (f.type === 'section') return h('div', { class: 'form-sec' }, f.label);
+      if (f.type === 'section') { curGroup = null; return h('div', { class: 'form-sec' }, f.label); }
+      if (f.type === 'group') {
+        var gid = f.key || ('g' + groupOrder.length);
+        var chev = h('span', { class: 'gchev', 'aria-hidden': 'true' });
+        chev.innerHTML = ICONS.chev;
+        var count = h('span', { class: 'gcount', 'aria-hidden': 'true' }, '');
+        var btn = h('button', { type: 'button', class: 'form-group', 'data-group': gid, 'aria-expanded': 'false' },
+          chev, h('span', { class: 'gl' }, f.label),
+          f.hint ? h('span', { class: 'gh-hint' }, f.hint) : null, count);
+        groups[gid] = { def: f, btn: btn, count: count, keys: [], open: false };
+        groupOrder.push(gid);
+        btn.addEventListener('click', function () { setGroupOpen(gid, !groups[gid].open); });
+        curGroup = gid;
+        return btn;
+      }
       if (f.type === 'note') return h('div', { class: 'form-note' }, f.label);
+      /* حقل «custom»: عقدة جاهزة (لا تسمية ولا قيمة) تُعرض داخل تسلسل الحقول،
+         وتُظهر/تُخفى عبر api.showField — تُستعمل لمربّع لصق صفحة اعتماد. */
+      if (f.type === 'custom') {
+        var cw = h('div', { class: 'field custom span2' + (f.hidden ? ' fhide' : ''), 'data-key': f.key });
+        if (f.node) cw.appendChild(f.node);
+        fieldsByKey[f.key] = { def: f, el: cw, ctl: null };
+        if (curGroup) { groups[curGroup].keys.push(f.key); cw.setAttribute('data-group', curGroup); cw.classList.add('gh'); }
+        return cw;
+      }
       var wrap = h('div', { class: 'field' + (f.span2 ? ' span2' : '') + (f.hidden ? ' hidden' : ''), 'data-key': f.key });
       var id = 'f_' + f.key + '_' + Math.random().toString(36).slice(2, 6);
       var lab = h('label', { for: id }, f.label, f.required ? h('span', { class: 'req', 'aria-hidden': 'true' }, '*') : null);
@@ -336,22 +390,46 @@
       if (f.hint) wrap.appendChild(h('div', { class: 'hint' }, f.hint));
       wrap.appendChild(h('div', { class: 'msg', role: 'alert' }));
       fieldsByKey[f.key] = { def: f, el: wrap, ctl: ctl || wrap.querySelector('.ctl') };
+      if (curGroup) {
+        groups[curGroup].keys.push(f.key);
+        wrap.setAttribute('data-group', curGroup);
+        wrap.classList.add('gh');
+      }
       return wrap;
     }
     (o.fields || []).forEach(function (f) { el.appendChild(buildField(f)); });
+    /* تُفتح المجموعة تلقائيًا إذا كانت تحوي قيمًا مسجّلة (شاشة التعديل) */
+    groupOrder.forEach(function (id) {
+      var g = groups[id];
+      if (g.def.open === true) { setGroupOpen(id, true); return; }
+      if (o.autoExpandFilled && g.keys.some(function (k) { return isFilled(values[k]); })) setGroupOpen(id, true);
+    });
+    refreshGroupCounts();
     api.values = function () { return U.clone(values); };
     api.get = function (k) { return values[k]; };
-    api.set = function (k, v) { values[k] = v; var f = fieldsByKey[k]; if (f && f.ctl && 'value' in f.ctl) f.ctl.value = v === null || v === undefined ? '' : v; };
+    api.set = function (k, v) { values[k] = v; var f = fieldsByKey[k]; if (f && f.ctl && 'value' in f.ctl) f.ctl.value = v === null || v === undefined ? '' : v; refreshGroupCounts(); };
     api.setErrors = function (errs) {
       Object.keys(fieldsByKey).forEach(function (k) { var f = fieldsByKey[k]; f.el.classList.remove('err'); f.el.querySelector('.msg').textContent = ''; });
       var first = null;
-      Object.keys(errs || {}).forEach(function (k) { var f = fieldsByKey[k]; if (!f) return; f.el.classList.add('err'); f.el.querySelector('.msg').textContent = errs[k]; if (!first) first = f; });
+      Object.keys(errs || {}).forEach(function (k) {
+        var f = fieldsByKey[k]; if (!f) return;
+        f.el.classList.add('err'); f.el.querySelector('.msg').textContent = errs[k];
+        var gid = groupOfField(k);            /* لا يُخفى حقل عليه خطأ */
+        if (gid) setGroupOpen(gid, true);
+        if (!first) first = f;
+      });
       if (first && first.ctl && first.ctl.focus) first.ctl.focus();
+      if (first && first.el.scrollIntoView) first.el.scrollIntoView({ block: 'center' });
     };
+    api.groups = function () { return groupOrder.slice(); };
+    api.openGroup = function (id, open) { setGroupOpen(id, open !== false); };
+    api.groupOpen = function (id) { return !!(groups[id] && groups[id].open); };
+    api.openGroupOf = function (key) { var g = groupOfField(key); if (g) setGroupOpen(g, true); return g; };
+    api.showField = function (key, on) { var f = fieldsByKey[key]; if (f) f.el.classList.toggle('fhide', !on); };
     api.validate = function () {
       var errs = {};
       (o.fields || []).forEach(function (f) {
-        if (!f.key || f.type === 'section' || f.type === 'note' || f.hidden) return;
+        if (!f.key || f.type === 'section' || f.type === 'note' || f.type === 'group' || f.type === 'custom' || f.hidden) return;
         var v = values[f.key];
         var empty = v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length);
         if (f.required && empty) { errs[f.key] = t('app.field_required'); return; }
@@ -479,11 +557,179 @@
     events.forEach(function (ev) { el.appendChild(h('div', { class: 'ev ' + (ev.kind || '') + (ev.future ? ' future' : '') }, h('div', { class: 'd' }, ev.date), h('div', { class: 't' }, ev.title), ev.sub ? h('div', { class: 's' }, ev.sub) : null, ev.extra || null)); });
     return el;
   };
-  UI.stageTrack = function (stageKey) {
-    var cols = STAGES.boardColumns(); var cur = STAGES.get(stageKey); var wrap = h('div', { class: 'stage-track', title: STAGES.label(stageKey, S.lang) });
-    cols.forEach(function (s) { var cls = ''; if (cur && !cur.terminal && !cur.parked) { if (s.order < cur.order) cls = 'done'; else if (s.order === cur.order) cls = 'cur'; } else if (cur && cur.terminal) cls = stageKey === 'lost' ? 'lost' : ''; wrap.appendChild(h('i', { class: cls })); });
+  /* ---------- مسار المراحل القابل للطي ----------
+     مطويًّا: الشريط الرفيع كما كان. ممدَّدًا: كل المراحل بأسمائها موزّعة على
+     مجموعات المسار، والمنجَز والحالي بلون واضح والمستقبلي رصاصي فاتح.
+     الضغط على أي مرحلة يفتح نافذة تشرح المطلوب فيها.
+     حالة الطي تُحفظ في المتصفح لكل مستخدم (crm-stagepath). */
+  var PATH_KEY = 'crm-stagepath';
+  function pathOpen() { try { return localStorage.getItem(PATH_KEY) === '1'; } catch (e) { return false; } }
+  function pathSet(v) { try { localStorage.setItem(PATH_KEY, v ? '1' : '0'); } catch (e) { } }
+
+  /* أبعد مرحلة بلغتها الفرصة — تُقرأ من سجل المراحل حتى يبقى المسار مفهومًا
+     للفرص المغلقة أو المعلّقة التي لا ترتيب لمرحلتها الحالية داخل المسار. */
+  function reachedOrder(opp) {
+    var cur = STAGES.get(opp.stage), max = 0;
+    if (cur && !cur.terminal && !cur.parked) return cur.order;
+    (S.historyOf ? S.historyOf(opp.id) : []).forEach(function (x) {
+      var st = STAGES.get(x.to_stage);
+      if (st && !st.terminal && !st.parked && st.order > max) max = st.order;
+    });
+    return max;
+  }
+
+  UI.stagePath = function (opp) {
+    var cols = STAGES.boardColumns();
+    var cur = STAGES.get(opp.stage);
+    var live = !!(cur && !cur.terminal && !cur.parked);
+    var reached = reachedOrder(opp);
+    var canStage = S.canRec('opportunities.stage', opp, S.parentsOf(opp));
+
+    function stateOf(st) {
+      if (live && st.order === cur.order) return 'cur';
+      if (st.order < reached) return 'done';
+      if (live && st.order === cur.order + 1) return 'next';
+      return '';
+    }
+
+    var rail = h('div', { class: 'stage-track' });
+    cols.forEach(function (st) { var c = stateOf(st); rail.appendChild(h('i', { class: c === 'cur' ? 'cur' : (c === 'done' ? 'done' : '') })); });
+
+    var grid = h('div', { class: 'spath-grid' });
+    var seen = {};
+    cols.forEach(function (st) { if (!seen[st.group]) { seen[st.group] = []; } seen[st.group].push(st); });
+    Object.keys(seen).forEach(function (g) {
+      var items = seen[g], done = items.filter(function (x) { return stateOf(x) === 'done'; }).length;
+      var col = h('div', { class: 'spath-col' },
+        h('div', { class: 'spath-ch' }, h('b', null, STAGES.groupLabel(g, S.lang)), h('s', null, done + '/' + items.length)));
+      items.forEach(function (st) {
+        var c = stateOf(st);
+        var btn = h('button', {
+          type: 'button', class: 'spath-st ' + c, 'data-stage': st.key,
+          'aria-label': STAGES.label(st.key, S.lang) + ' — ' + t('op.path_position', { n: st.order, m: cols.length })
+        },
+          h('u', null, c === 'done' ? '✓' : String(st.order)),
+          h('span', null, STAGES.label(st.key, S.lang)),
+          c === 'next' ? h('em', { class: 'spath-nb' }, t('op.path_next')) : null);
+        btn.addEventListener('click', function (e) { e.stopPropagation(); openStagePop(btn, st, opp, canStage, live, cur, cols.length); });
+        col.appendChild(btn);
+      });
+      grid.appendChild(col);
+    });
+
+    var legend = h('div', { class: 'spath-lg' },
+      h('i', null, h('span', { class: 'sw d' }), t('op.path_st_done')),
+      h('i', null, h('span', { class: 'sw c' }), t('op.path_st_current')),
+      h('i', null, h('span', { class: 'sw n' }), t('op.path_st_next')),
+      h('i', null, h('span', { class: 'sw' }), t('op.path_st_future')),
+      !live ? h('i', { class: 'warn-txt' }, cur && cur.parked ? t('op.path_parked') : t('op.path_closed')) : null);
+
+    var body = h('div', { class: 'spath-body' }, grid, legend);
+    var tog = h('button', { class: 'btn xs ghost spath-tog', type: 'button', 'aria-expanded': 'false' });
+    var wrap = h('div', { class: 'spath' }, h('div', { class: 'spath-head' }, rail, tog), body);
+
+    function apply(open) {
+      body.hidden = !open;
+      tog.setAttribute('aria-expanded', open ? 'true' : 'false');
+      D.clear(tog); tog.appendChild(D.text(open ? t('op.path_collapse') : t('op.path_expand')));
+      tog.classList.toggle('on', open);
+      if (!open) closeStagePop();
+    }
+    tog.addEventListener('click', function () { var v = tog.getAttribute('aria-expanded') !== 'true'; pathSet(v); apply(v); });
+    apply(pathOpen());
     return wrap;
   };
+
+  /* نافذة شرح المرحلة — مثبّتة قرب المرحلة المضغوطة */
+  var curPop = null;
+  function closeStagePop() {
+    if (!curPop) return;
+    if (curPop.anchor) curPop.anchor.classList.remove('open');
+    if (curPop.el.parentNode) curPop.el.parentNode.removeChild(curPop.el);
+    document.removeEventListener('mousedown', curPop.onDoc, true);
+    document.removeEventListener('keydown', curPop.onKey, true);
+    window.removeEventListener('resize', curPop.onMove);
+    window.removeEventListener('scroll', curPop.onMove, true);
+    curPop = null;
+  }
+  UI.closeStagePop = closeStagePop;
+
+  function openStagePop(anchor, st, opp, canStage, live, cur, total) {
+    var wasOpen = curPop && curPop.anchor === anchor;
+    closeStagePop();
+    if (wasOpen) return;
+
+    var isCur = live && st.order === cur.order;
+    var back = live && st.order < cur.order;
+    var sub;
+    if (isCur) sub = t('op.path_st_current');
+    else if (back) sub = t('op.path_behind');
+    else if (live) {
+      var d = st.order - cur.order;
+      /* العربية تميّز المفرد والمثنّى والجمع، وتعود للمفرد بعد العشرة */
+      sub = d === 1 ? t('op.path_st_next') : t('op.path_ahead', { c: root.tp('op.n_stages', d) });
+    } else sub = t('op.path_st_future');
+
+    var guide = STAGES.guide(st.key, S.lang);
+    /* قفز للأمام: المراحل التي بينهما تُعدّ منجزة — يُصرَّح بها قبل النقل لا بعده */
+    var skipped = live ? STAGES.between(opp.stage, st.key) : [];
+    var reqs = st.required_fields || [];
+    var pop = h('div', { class: 'spop', role: 'dialog', 'aria-label': STAGES.label(st.key, S.lang) },
+      h('div', { class: 'spop-arw', 'aria-hidden': 'true' }),
+      h('h4', null, h('u', null, String(st.order)), STAGES.label(st.key, S.lang)),
+      h('div', { class: 'spop-sub' }, sub + ' · ' + STAGES.groupLabel(st.group, S.lang) + ' · ' + t('op.path_position', { n: st.order, m: total })),
+      guide.length ? h('h5', null, t('op.path_guide')) : null,
+      guide.length ? h('ul', null, guide.map(function (g) { return h('li', null, g); })) : null,
+      h('h5', null, t('op.path_req_fields')),
+      reqs.length
+        ? h('div', { class: 'spop-req' }, reqs.map(function (k) { return h('i', null, root.tf(k)); }))
+        : h('div', { class: 'spop-none' }, t('op.path_no_req')),
+      skipped.length ? h('div', { class: 'spop-skip' },
+        t('op.stage_skips', { c: root.tp('op.n_stages', skipped.length), list: skipped.map(function (x) { return x.order; }).join('، ') })) : null,
+      h('div', { class: 'spop-kv' },
+        st.max_days ? h('span', null, t('op.path_ref_days') + ': ', h('b', null, t('op.path_days', { n: st.max_days }))) : null,
+        h('span', null, t('op.path_prob') + ': ', h('b', null, st.probability + '%')),
+        h('span', { class: (st.requires_reason || back) ? 'warn-txt' : '' }, (st.requires_reason || back) ? t('op.path_needs_reason') : t('op.path_no_reason'))));
+
+    var acts = h('div', { class: 'spop-act' });
+    if (!isCur) {
+      /* الزر يبقى ظاهرًا معطّلًا مع بيان السبب — إخفاؤه بلا تفسير يُربك الموظف */
+      var blocked = !live ? t('op.path_closed_move') : (!canStage ? t('op.path_no_perm') : null);
+      var mv = h('button', { class: 'btn sm primary', type: 'button', disabled: !!blocked, title: blocked || '' }, t('op.path_move_here'));
+      if (!blocked) mv.addEventListener('click', function () { closeStagePop(); FORMS.stageChange(opp, st.key).then(function (r) { if (r) root.APP.route(); }); });
+      acts.appendChild(mv);
+      if (blocked) pop.appendChild(h('div', { class: 'spop-blocked' }, blocked));
+    }
+    acts.appendChild(h('button', { class: 'btn sm', type: 'button', on: { click: closeStagePop } }, t('app.close')));
+    pop.appendChild(acts);
+
+    document.body.appendChild(pop);
+    anchor.classList.add('open');
+
+    function place() {
+      var r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+      var vw = window.innerWidth, vh = window.innerHeight, m = 8;
+      var top = r.bottom + 10, above = false;
+      if (top + ph > vh - m) { if (r.top - ph - 10 >= m) { top = r.top - ph - 10; above = true; } else { top = Math.max(m, vh - ph - m); } }
+      var left = S.lang === 'en' ? r.left : r.right - pw;      /* المحاذاة مع حافة المرحلة حسب الاتجاه */
+      left = Math.min(Math.max(m, left), vw - pw - m);
+      pop.style.top = top + 'px'; pop.style.left = left + 'px';
+      pop.classList.toggle('above', above);
+      var ax = Math.min(Math.max(14, r.left + r.width / 2 - left - 6), pw - 26);
+      pop.querySelector('.spop-arw').style.left = ax + 'px';
+    }
+    place();
+
+    var api = { el: pop, anchor: anchor, onMove: place };
+    api.onDoc = function (e) { if (!pop.contains(e.target) && !anchor.contains(e.target)) closeStagePop(); };
+    api.onKey = function (e) { if (e.key === 'Escape') { e.stopPropagation(); closeStagePop(); anchor.focus(); } };
+    curPop = api;
+    document.addEventListener('mousedown', api.onDoc, true);
+    document.addEventListener('keydown', api.onKey, true);
+    window.addEventListener('resize', api.onMove);
+    window.addEventListener('scroll', api.onMove, true);
+  }
+
   UI.link = function (href, text, cls) { return h('a', { href: href, class: cls || 'lnk' }, text); };
   UI.recordLink = function (entity, id, text) { var route = { customer: 'customers', opportunity: 'opportunities', proposal: 'proposals', contract: 'contracts', contact: 'customers', activity: 'activities', campaign: 'occasions', project: 'contracts' }[entity]; if (entity === 'contact') { var c = S.get('contact', id); return UI.link('#/customers/' + (c ? c.customer_id : '') + '?tab=contacts', text || (c ? c.full_name : id)); } if (entity === 'project') { var p = S.get('project', id); return UI.link('#/contracts/' + (p ? p.contract_id : ''), text || (p ? p.name : id)); } return UI.link('#/' + route + '/' + id, text || id); };
 

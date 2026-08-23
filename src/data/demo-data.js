@@ -10,16 +10,16 @@
   var U = root.U, STAGES = root.STAGES, MODEL = root.MODEL, L = root.LOOKUPS, RULES = root.RULES;
 
   var USERS = [
-    { id: 'u_admin',   email: 'demo.admin@example.com',     name_ar: 'م. ماجد السويلم',           name_en: 'Eng. Majed Al-Suwailem',        role: 'system_admin' },
-    { id: 'u_bdm',     email: 'demo.bdm@example.com',       name_ar: 'م. فهد العتيبي',            name_en: 'Eng. Fahad Al-Otaibi',       role: 'bd_manager' },
-    { id: 'u_bd1',     email: 'demo.bd1@example.com',       name_ar: 'سلطان الحربي',              name_en: 'Sultan Al-Harbi',            role: 'bd_employee' },
-    { id: 'u_bd2',     email: 'demo.bd2@example.com',       name_ar: 'نورة القحطاني',             name_en: 'Noura Al-Qahtani',           role: 'bd_employee' },
-    { id: 'u_bd3',     email: 'demo.bd3@example.com',       name_ar: 'عبدالله الشهري',            name_en: 'Abdullah Al-Shehri',         role: 'bd_employee' },
-    { id: 'u_pm',      email: 'demo.proposals@example.com', name_ar: 'م. ريم الدوسري',            name_en: 'Eng. Reem Al-Dosari',        role: 'proposal_manager' },
-    { id: 'u_com',     email: 'demo.commercial@example.com', name_ar: 'خالد المطيري',             name_en: 'Khalid Al-Mutairi',          role: 'commercial_reviewer' },
-    { id: 'u_ctr',     email: 'demo.contracts@example.com', name_ar: 'أ. هند الزهراني',           name_en: 'Hind Al-Zahrani',            role: 'contract_reviewer' },
-    { id: 'u_exec',    email: 'demo.exec@example.com',      name_ar: 'د. وليد الراجحي',           name_en: 'Dr. Waleed Al-Rajhi',                 role: 'executive_viewer' },
-    { id: 'u_ro',      email: 'demo.viewer@example.com',    name_ar: 'سامي العبدلي',              name_en: 'Sami Al-Abdali',    role: 'readonly_viewer' }
+    { id: 'u_admin',   email: 'admin@example.com',     name_ar: 'م. ماجد السويلم',           name_en: 'Eng. Majed Al-Suwailem',        role: 'system_admin' },
+    { id: 'u_bdm',     email: 'bdm@example.com',       name_ar: 'م. فهد العتيبي',            name_en: 'Eng. Fahad Al-Otaibi',       role: 'bd_manager' },
+    { id: 'u_bd1',     email: 'bd1@example.com',       name_ar: 'سلطان الحربي',              name_en: 'Sultan Al-Harbi',            role: 'bd_employee' },
+    { id: 'u_bd2',     email: 'bd2@example.com',       name_ar: 'نورة القحطاني',             name_en: 'Noura Al-Qahtani',           role: 'bd_employee' },
+    { id: 'u_bd3',     email: 'bd3@example.com',       name_ar: 'عبدالله الشهري',            name_en: 'Abdullah Al-Shehri',         role: 'bd_employee' },
+    { id: 'u_pm',      email: 'proposals@example.com', name_ar: 'م. ريم الدوسري',            name_en: 'Eng. Reem Al-Dosari',        role: 'proposal_manager' },
+    { id: 'u_com',     email: 'commercial@example.com', name_ar: 'خالد المطيري',             name_en: 'Khalid Al-Mutairi',          role: 'commercial_reviewer' },
+    { id: 'u_ctr',     email: 'contracts@example.com', name_ar: 'أ. هند الزهراني',           name_en: 'Hind Al-Zahrani',            role: 'contract_reviewer' },
+    { id: 'u_exec',    email: 'exec@example.com',      name_ar: 'د. وليد الراجحي',           name_en: 'Dr. Waleed Al-Rajhi',                 role: 'executive_viewer' },
+    { id: 'u_ro',      email: 'viewer@example.com',    name_ar: 'سامي العبدلي',              name_en: 'Sami Al-Abdali',    role: 'readonly_viewer' }
   ];
   var BD = ['u_bd1', 'u_bd2', 'u_bd3', 'u_bdm'];
 
@@ -80,9 +80,9 @@
         cr_number: type === 'government' ? null : String(1010000000 + rnd.int(100000, 899999)),
         unified_number: String(7000000000 + rnd.int(1000000, 8999999)),
         vat_number: type === 'government' ? null : ('3' + String(rnd.int(10000000, 99999999)) + String(rnd.int(100000, 999999))),
-        website: type === 'government' ? null : ('www.' + ORG_A_EN[wi].toLowerCase().replace(/\s+/g, '') + '-demo.example'),
+        website: type === 'government' ? null : ('www.' + ORG_A_EN[wi].toLowerCase().replace(/\s+/g, '') + '.example'),
         phone: i % 9 === 4 ? null : ('011' + rnd.int(2000000, 4999999)),
-        email: i % 9 === 4 ? null : ('info@' + ORG_A_EN[wi].toLowerCase().replace(/\s+/g, '') + '-demo.example'),
+        email: i % 9 === 4 ? null : ('info@' + ORG_A_EN[wi].toLowerCase().replace(/\s+/g, '') + '.example'),
         address: 'طريق الملك فهد، حي ' + rnd.pick(['العليا', 'الملقا', 'الياسمين', 'السليمانية', 'النخيل', 'الروضة']),
         region: region.key, city: region.cities[0].key,
         status: status, source: rnd.pick(L.customer_sources).key,
@@ -114,7 +114,7 @@
         var ct = Object.assign(MODEL.defaults('contact', c.owner_id), {
           id: nid('CON'), customer_id: c.id, full_name: (pos[2] === 'technical' || pos[2] === 'site' ? 'م. ' : '') + fn + ' ' + ln, position: pos[0], department: rnd.pick(['الإدارة الهندسية', 'المشتريات والعقود', 'إدارة المشاريع', 'الإدارة العليا', 'الشؤون المالية']),
           seniority: pos[2] === 'decision_maker' ? 'executive' : rnd.pick(['senior', 'middle', 'staff']), roles: [pos[2]].concat(rnd.chance(0.3) ? ['influencer'] : []),
-          phone: rnd.chance(0.85) ? '05' + rnd.int(10000000, 99999999) : null, email: rnd.chance(0.8) ? (fn.length + '.' + ln.length + k + '@' + (c.email ? c.email.split('@')[1] : 'contact-demo.example')).replace(/^/, 'c' + ci) : null,
+          phone: rnd.chance(0.85) ? '05' + rnd.int(10000000, 99999999) : null, email: rnd.chance(0.8) ? (fn.length + '.' + ln.length + k + '@' + (c.email ? c.email.split('@')[1] : 'contact.example')).replace(/^/, 'c' + ci) : null,
           preferred_channel: rnd.pick(['phone', 'email', 'meeting']), preferred_language: c.preferred_language,
           last_contact_at: rnd.chance(0.7) ? dayAgo(rnd.int(1, 90)) : null, next_follow_up: rnd.chance(0.4) ? (rnd.chance(0.3) ? dayAgo(rnd.int(1, 10)) : dayAhead(rnd.int(1, 30))) : null,
           notes: rnd.chance(0.3) ? 'يفضّل الاجتماعات الصباحية.' : '', greeting_opt_out: rnd.chance(0.08), active: rnd.chance(0.92), is_primary: k === 0

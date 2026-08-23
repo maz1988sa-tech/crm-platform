@@ -17,8 +17,8 @@
     platform: {
       name_ar: 'إحراز',
       name_en: 'Ihraz',
-      tagline_ar: 'من الفرصة إلى الإنجاز',
-      tagline_en: 'From opportunity to achievement',
+      tagline_ar: 'نُحرز الفرص ونستقطب الكفاءات',
+      tagline_en: 'Winning deals, attracting talent',
       short_ar: 'إحراز',
       short_en: 'Ihraz',
       company_ar: ENV.company_ar || 'شركة المقاولات',      // اسم الشركة (اختياري، يظهر بجانب الشعار)
