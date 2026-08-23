@@ -71,6 +71,51 @@
     return m;
   }
 
+  /* ---------- اختيار المنصة ----------
+     «إحراز» مظلّة على منصّتين: إدارة العملاء والفرص تعمل من داخل هذه المنصة
+     ودخولها هنا، واستقطاب المواهب منصّة مستقلّة لها خادمها ودخولها الخاص —
+     نربطها برابط واحد يعيش في الإعداد (products.talent_url) ولا نمسّ
+     مشروعها. الرابط الفارغ يعطي تنبيهًا واضحًا لا رابطًا ميّتًا. */
+  /* رابط منصة المواهب حسب الوجهة: 'manager' لواجهة اعتماد المرشّحين،
+     وما عداها واجهة الموظفين. مصدر الرابطين الإعداد لا الكود. */
+  function talentUrl(dest) {
+    var pr = CFG.products || {};
+    if (dest === 'manager') return pr.talent_manager_url || pr.talent_url || '';
+    return pr.talent_url || '';
+  }
+
+  function pickTile(node, icon, name, note) {
+    node.classList.add('lp-pick');
+    node.appendChild(UI.icon(icon));
+    node.appendChild(h('span', { class: 'nm' }, name));
+    node.appendChild(h('span', { class: 'nt' }, note));
+    return node;
+  }
+
+  /* المنصة التي اختارها الزائر قبل الدخول — تلميح فقط لا صلاحية.
+     الدور في الحساب هو الحقيقة، وهو وحده من يقرّر إلى أين يذهب. */
+  var pendingPick = null;
+
+  /* كلتا البلاطتين تفتحان تسجيل الدخول نفسه. لا نُخرج أحدًا إلى منصة
+     المواهب قبل أن يثبت من هو: رابط المدير غير رابط الموظف، ولا سبيل
+     لمعرفة أيّهما إلا بعد الدخول. */
+  function chooseModal(rootEl, onPick) {
+    var m = UI.modal({ title: t('lp.choose_title'), size: 'sm', footer: false });
+    m.body.appendChild(h('p', { class: 'muted small' }, t('lp.choose_sub')));
+
+    function tile(icon, name, note, app) {
+      var b = pickTile(h('button', { type: 'button' }), icon, name, note);
+      b.addEventListener('click', function () { m.close(true); onPick(app); });
+      return b;
+    }
+    var crm = tile('cap_customers', t('lp.prod_crm_name'), t('lp.choose_crm_note'), 'crm');
+    var ta  = tile('cap_talent',    t('lp.prod_ta_name'),  t('lp.choose_ta_note'),  'talent');
+
+    m.body.appendChild(h('div', { class: 'lp-picks' }, crm, ta));
+    setTimeout(function () { if (crm.focus) crm.focus(); }, 30);
+    return m;
+  }
+
   /* معاينة مصغّرة للمنصتين — عناصر الواجهة نفسها لا صورة خارجية */
   function heroPreview(kind) {
     function tile(label, val) { return h('div', { class: 'lp-tile' }, h('span', null, label), h('b', null, val)); }
@@ -88,24 +133,65 @@
         h('div', { class: 'lp-list' }, row(52, 22, true), row(38, 30), row(64, 18), row(30, 26), row(46, 34))));
   }
 
+  /* ---------- شاشة التحويل بعد الدخول ----------
+     المستخدم بدور من أدوار منصة المواهب ليس له عمل داخل إدارة العملاء،
+     فلا نبني له واجهتها. يرى بطاقة باسمه ودوره ووصلة إلى منصته.
+     لا تحويل تلقائي: الموظف ينقر بنفسه — نقرة مباشرة لا يوقفها مانع
+     النوافذ، وتُبقي له طريق العودة وتسجيل الخروج ظاهرًا. */
+  function renderLaunch(rootEl, usr) {
+    D.clear(rootEl);
+    var dest = PERMS.destOf(usr.role);
+    var url = talentUrl(dest);
+    var nm = S.lang === 'en' ? (usr.name_en || usr.name_ar) : (usr.name_ar || usr.name_en);
+
+    var action = url
+      ? h('a', { class: 'btn primary lg', href: url, target: '_blank', rel: 'noopener noreferrer' }, t('launch.open'))
+      : h('button', { class: 'btn lg', type: 'button', disabled: 'disabled' }, t('launch.no_url'));
+
+    var card = h('div', { class: 'launch-card' },
+      UI.icon('cap_talent'),
+      h('h1', null, t('launch.title')),
+      h('p', { class: 'who' }, nm, h('span', { class: 'role' }, PERMS.roleLabel(usr.role, S.lang))),
+      h('p', { class: 'muted small' }, t(dest === 'manager' ? 'launch.as_manager' : 'launch.as_staff')),
+      action,
+      url ? h('p', { class: 'muted xs' }, t('launch.second_signin')) : h('p', { class: 'muted xs' }, t('launch.no_url_hint')),
+      h('button', { class: 'linkbtn', type: 'button', on: { click: function () {
+        S.adapter.signOut().then(function () { S.user = null; renderLogin(rootEl); });
+      } } }, t('app.signout')));
+
+    rootEl.appendChild(h('div', { class: 'lh launch' },
+      h('div', { class: 'lh-top' },
+        h('div', { class: 'lh-brand' },
+          h('div', { class: 'lockup' }, UI.brandMark(46, 'on-dark'),
+            h('span', { class: 'name' }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar)),
+          h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar))),
+      h('div', { class: 'launch-main' }, card)));
+  }
+
   function renderLogin(rootEl, err) {
     D.clear(rootEl);
     var demoMode = S.mode === 'local';
     var opened = null;
-    function openLogin(e0) { if (opened && !opened.closed) return; opened = loginModal(rootEl, e0); }
+    function busy() { return opened && !opened.closed; }
+    function openLogin(app, e0) { if (busy()) return; pendingPick = app || null; opened = loginModal(rootEl, e0); }
+    /* زر الدخول العام يسأل أولًا عن المنصة ثم يطلب الدخول؛ وبطاقة كل
+       منتج تطلب الدخول مباشرة وقد عرفنا منصتها من البطاقة نفسها. */
+    function openChoose() { if (busy()) return; opened = chooseModal(rootEl, function (app) { openLogin(app); }); }
     function jump(id) { return function (e) { e.preventDefault(); var el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; }
 
     var top = h('div', { class: 'lh-top' },
-      h('div', { class: 'lh-brand' }, UI.brandMark(46, 'on-dark'),
-        h('div', { class: 'titles' },
-          h('span', { class: 'name' }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar),
-          h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar))),
+      /* قفل العلامة: صفٌّ للشعار والاسم، والشعار النصّي تحتهما يشترك معهما
+         في الحافة نفسها — فالكتلة كلها مربّع واحد لا يخرج عنه شيء. */
+      h('div', { class: 'lh-brand' },
+        h('div', { class: 'lockup' }, UI.brandMark(46, 'on-dark'),
+          h('span', { class: 'name' }, S.lang === 'en' ? CFG.platform.name_en : CFG.platform.name_ar)),
+        h('span', { class: 'slogan' }, S.lang === 'en' ? CFG.platform.tagline_en : CFG.platform.tagline_ar)),
       h('nav', { class: 'lh-nav', 'aria-label': t('lp.nav_products') },
         h('a', { href: '#lp-products', on: { click: jump('lp-products') } }, t('lp.nav_products')),
         h('a', { href: '#lp-contact', on: { click: jump('lp-contact') } }, t('lp.nav_contact'))),
       h('div', { class: 'lh-act' },
         h('button', { class: 'lh-lang', type: 'button', on: { click: function () { S.setLang(S.lang === 'ar' ? 'en' : 'ar'); renderLogin(rootEl); } } }, t('app.lang_toggle')),
-        h('button', { class: 'lh-signin', type: 'button', on: { click: function () { openLogin(); } } }, t('login.title'))));
+        h('button', { class: 'lh-signin', type: 'button', on: { click: function () { openChoose(); } } }, t('login.title'))));
 
     var copy = h('div', { class: 'lh-copy' },
       h('h1', null, h('span', { class: 'l1' }, t('lp.h1_lead')), h('span', { class: 'l2' }, t('lp.h1_main'))),
@@ -131,9 +217,9 @@
       h('div', { class: 'lp-head' }, h('h2', null, t('lp.products_title'))),
       h('div', { class: 'lp-cards' },
         prodCard(t('lp.prod_crm_name'), t('lp.prod_crm_desc'), ['lp.prod_crm_f1', 'lp.prod_crm_f2', 'lp.prod_crm_f3'],
-          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin(); } } }, t('lp.prod_enter'))),
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin('crm'); } } }, t('lp.prod_enter'))),
         prodCard(t('lp.prod_ta_name'), t('lp.prod_ta_desc'), ['lp.prod_ta_f1', 'lp.prod_ta_f2', 'lp.prod_ta_f3'],
-          h('button', { class: 'lp-go', type: 'button', on: { click: function () { UI.toast(t('lp.prod_ta_pending'), '', 3500); } } }, t('lp.prod_enter')))));
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin('talent'); } } }, t('lp.prod_enter')))));
 
     /* ---- تواصل معنا ---- */
     function contactRow(label, val) {
@@ -175,7 +261,7 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHead);
     var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(fitHead, 120); });
 
-    if (err) openLogin(err);
+    if (err) openLogin(null, err);   /* خطأ سابق: نفتح الدخول بلا منصة مختارة */
   }
 
   /* ---------- الهيكل ---------- */
@@ -294,10 +380,22 @@
   APP.refresh = function () { return S.refresh().then(function () { updateBadges(); }); };
   APP.rerender = function () { return APP.refresh().then(route); };
   APP.parseHash = parseHash;
+  /* إعادة رسم صفحة الهبوط — يستعملها الخروج وتبديل اللغة والاختبارات */
+  APP.renderLogin = function (el, err) { return renderLogin(el || D.qs('#app'), err); };
 
   APP.afterLogin = function (usr) {
     S.user = usr;
     if (S.adapter && S.adapter.demo !== undefined) S.demo = !!S.adapter.demo;
+    /* أدوار منصة المواهب لا تملك صلاحية واحدة في إدارة العملاء، فبناء
+       واجهتها لهم عبث وتسريب لهيكل لا يخصّهم — يُحوَّلون إلى منصتهم. */
+    var picked = pendingPick; pendingPick = null;
+    var mine = PERMS.appOf(usr.role);
+    /* اختار منصة غير منصته: نأخذه إلى منصته ونقول له لماذا، بدل أن
+       نتركه يظن أن الدخول فشل أو أن الرابط خطأ. */
+    if (picked && picked !== mine) {
+      UI.toast(t(mine === 'talent' ? 'login.sent_to_talent' : 'login.sent_to_crm'), '', 4500);
+    }
+    if (mine === 'talent') { renderLaunch(D.qs('#app'), usr); return Promise.resolve(); }
     return S.refresh().then(function () { buildShell(D.qs('#app')); if (!location.hash || location.hash === '#/' || location.hash === '#') location.hash = '#/overview'; route(); });
   };
 

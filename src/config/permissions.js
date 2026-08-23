@@ -18,7 +18,13 @@
     { key: 'commercial_reviewer', ar: 'مراجع تجاري',             en: 'Commercial Reviewer' },
     { key: 'contract_reviewer',   ar: 'مراجع عقود',              en: 'Contract Reviewer' },
     { key: 'executive_viewer',    ar: 'مطّلع تنفيذي',            en: 'Executive Viewer' },
-    { key: 'readonly_viewer',     ar: 'مطّلع (قراءة فقط)',       en: 'Read-Only Viewer' }
+    { key: 'readonly_viewer',     ar: 'مطّلع (قراءة فقط)',       en: 'Read-Only Viewer' },
+    /* أدوار منصة استقطاب المواهب — لا تملك أي صلاحية في إدارة العملاء.
+       المستخدم بأحد هذين الدورين يدخل من «إحراز» ثم يُحوَّل إلى منصته:
+       app: 'talent' يقول أي منصة، و dest يقول أي واجهة داخلها.
+       الروابط نفسها في APP_CONFIG.products لا هنا — هذا ملف أدوار لا عناوين. */
+    { key: 'talent_manager',      ar: 'مدير استقطاب المواهب',    en: 'Talent Acquisition Manager',  app: 'talent', dest: 'manager' },
+    { key: 'talent_employee',     ar: 'موظف استقطاب المواهب',    en: 'Talent Acquisition Officer',  app: 'talent', dest: 'staff' }
   ];
 
   /* الصلاحيات المعرَّفة في المنصة */
@@ -117,7 +123,12 @@
     readonly_viewer: {
       'customers.view': 'all', 'opportunities.view': 'all', 'proposals.view': 'all',
       'activities.view': 'all', 'reports.view': 'all'
-    }
+    },
+
+    /* لا صلاحيات في إدارة العملاء — مبدأ أقل الصلاحيات: هذان الدوران
+       للدخول والتحويل إلى منصة المواهب فقط، فلا يريان بيانات العملاء. */
+    talent_manager: {},
+    talent_employee: {}
   };
 
   /* أنواع الاعتماد التي يحق لكل دور البت فيها تُقرأ من RULES.approvals[type].approver_roles */
@@ -129,6 +140,16 @@
     roleLabel: function (key, lang) {
       for (var i = 0; i < ROLES.length; i++) if (ROLES[i].key === key) return lang === 'en' ? ROLES[i].en : ROLES[i].ar;
       return key || '';
+    },
+    /* أي منصة يخصّ هذا الدور: 'crm' افتراضًا، أو 'talent' لأدوار المواهب */
+    appOf: function (key) {
+      for (var i = 0; i < ROLES.length; i++) if (ROLES[i].key === key) return ROLES[i].app || 'crm';
+      return 'crm';
+    },
+    /* أي واجهة داخل منصة المواهب: 'manager' أو 'staff' */
+    destOf: function (key) {
+      for (var i = 0; i < ROLES.length; i++) if (ROLES[i].key === key) return ROLES[i].dest || null;
+      return null;
     }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

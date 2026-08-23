@@ -56,6 +56,10 @@
       }
     },
     roleLabel: function (role, lang) { return PC.roleLabel(role, lang); },
+    /* أي منصة يخصّ الدور — 'crm' أو 'talent'؛ يقرّر إلى أين يذهب المستخدم بعد الدخول */
+    appOf: function (role) { return PC.appOf(role); },
+    destOf: function (role) { return PC.destOf(role); },
+    isTalent: function (user) { return !!user && PC.appOf(user.role) === 'talent'; },
     /* هل يرى القيم التجارية لهذا السجل */
     canSeeCommercial: function (user, rec, parents) { return P.canRecord(user, 'commercial.view', rec, parents); },
     /* الصفحات/الوحدات المسموح عرضها */

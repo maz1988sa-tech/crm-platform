@@ -19,7 +19,10 @@
     { id: 'u_com',     email: 'commercial@example.com', name_ar: 'خالد المطيري',             name_en: 'Khalid Al-Mutairi',          role: 'commercial_reviewer' },
     { id: 'u_ctr',     email: 'contracts@example.com', name_ar: 'أ. هند الزهراني',           name_en: 'Hind Al-Zahrani',            role: 'contract_reviewer' },
     { id: 'u_exec',    email: 'exec@example.com',      name_ar: 'د. وليد الراجحي',           name_en: 'Dr. Waleed Al-Rajhi',                 role: 'executive_viewer' },
-    { id: 'u_ro',      email: 'viewer@example.com',    name_ar: 'سامي العبدلي',              name_en: 'Sami Al-Abdali',    role: 'readonly_viewer' }
+    { id: 'u_ro',      email: 'viewer@example.com',    name_ar: 'سامي العبدلي',              name_en: 'Sami Al-Abdali',    role: 'readonly_viewer' },
+    /* مستخدما منصة استقطاب المواهب — يدخلان من إحراز ويُحوَّلان إلى منصتهما */
+    { id: 'u_tam',     email: 'talent.manager@example.com', name_ar: 'م. بدر العنزي',        name_en: 'Eng. Badr Al-Anazi',         role: 'talent_manager' },
+    { id: 'u_tao',     email: 'talent@example.com',    name_ar: 'لمى الغامدي',               name_en: 'Lama Al-Ghamdi',             role: 'talent_employee' }
   ];
   var BD = ['u_bd1', 'u_bd2', 'u_bd3', 'u_bdm'];
 
