@@ -854,6 +854,12 @@ body[dir=ltr] .stbl .tr-bar i { border-radius: 0 4px 4px 0; }
 .lp-pick.off { cursor: help; opacity: .62; }
 .lp-pick.off:hover { border-color: var(--line); background: var(--card); transform: none; }
 @media (max-width: 460px) { .lp-picks { grid-template-columns: 1fr; } }
+.pick-back { display: block; margin: 14px auto 0; background: none; border: 0; padding: 6px 10px;
+  font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; border-radius: 7px; }
+.pick-back:hover { color: var(--ink); background: var(--paper); }
+.pick-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pick-back::before { content: "→"; margin-inline-end: 6px; }
+[dir="ltr"] .pick-back::before { content: "←"; }
 .lp-contact { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 0;
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--sh); }
 .lp-crow { display: flex; align-items: center; justify-content: space-between; gap: 16px;

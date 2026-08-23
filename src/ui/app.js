@@ -25,8 +25,12 @@
      صفحة هبوط بواجهة واحدة: العلامة يمينًا، واللغة وزر الدخول يسارًا،
      والرسالة والمعاينة في الوسط. نموذج الدخول يُفتح في نافذة عند الطلب
      فلا يشغل نصف الشاشة قبل أن يحتاجه أحد. */
-  function loginModal(rootEl, initialErr) {
+  function loginModal(rootEl, initialErr, pick) {
     var demoMode = S.mode === 'local';
+    /* في الوضع التجريبي تُعرض بطاقات المستخدمين بدل كلمة المرور. تُقصر
+       على مستخدمي المنصة المختارة: من ضغط «استقطاب المواهب» لا يُعرض
+       عليه موظفو إدارة العملاء. في الإنتاج لا قائمة أصلًا — بريد وكلمة مرور. */
+    var wantApp = pick && pick.app ? pick.app : null;
     var m = UI.modal({ title: demoMode ? t('login.demo_title') : t('login.title'), size: 'sm' });
     var msg = h('div', { class: 'login-msg' });
     m.body.appendChild(msg);
@@ -41,7 +45,9 @@
       m.body.appendChild(h('p', { class: 'muted small' }, t('login.demo_hint')));
       var grid = h('div', { class: 'demo-users' });
       S.adapter.users().then(function (users) {
-        users.filter(function (u) { return u.active !== false; }).forEach(function (u) {
+        users.filter(function (u) { return u.active !== false; })
+          .filter(function (u) { return !wantApp || PERMS.appOf(u.role) === wantApp; })
+          .forEach(function (u) {
           var nm = S.lang === 'en' ? (u.name_en || u.name_ar) : (u.name_ar || u.name_en);
           grid.appendChild(h('button', { type: 'button', on: { click: function () {
             S.adapter.signInAs(u.id).then(function (usr) { m.close(true); APP.afterLogin(usr); }).catch(fail);
@@ -96,23 +102,44 @@
      الدور في الحساب هو الحقيقة، وهو وحده من يقرّر إلى أين يذهب. */
   var pendingPick = null;
 
-  /* كلتا البلاطتين تفتحان تسجيل الدخول نفسه. لا نُخرج أحدًا إلى منصة
-     المواهب قبل أن يثبت من هو: رابط المدير غير رابط الموظف، ولا سبيل
-     لمعرفة أيّهما إلا بعد الدخول. */
+  /* نافذة الاختيار على خطوتين:
+       ١) أي منصة — إدارة العملاء أم استقطاب المواهب.
+       ٢) داخل المواهب: أي واجهة — المدير أم الموظفين.
+     ثم تسجيل الدخول. الاختيار كلّه تلميح لا صلاحية: الدور في الحساب هو
+     الحقيقة، فلا يصل أحد إلى واجهة لا تخصّه بضغط المربّع الخطأ. */
   function chooseModal(rootEl, onPick) {
     var m = UI.modal({ title: t('lp.choose_title'), size: 'sm', footer: false });
-    m.body.appendChild(h('p', { class: 'muted small' }, t('lp.choose_sub')));
 
-    function tile(icon, name, note, app) {
+    function tile(icon, name, note, go) {
       var b = pickTile(h('button', { type: 'button' }), icon, name, note);
-      b.addEventListener('click', function () { m.close(true); onPick(app); });
+      b.addEventListener('click', go);
       return b;
     }
-    var crm = tile('cap_customers', t('lp.prod_crm_name'), t('lp.choose_crm_note'), 'crm');
-    var ta  = tile('cap_talent',    t('lp.prod_ta_name'),  t('lp.choose_ta_note'),  'talent');
+    function focusFirst() { var f = m.body.querySelector('.lp-pick'); setTimeout(function () { if (f && f.focus) f.focus(); }, 30); }
 
-    m.body.appendChild(h('div', { class: 'lp-picks' }, crm, ta));
-    setTimeout(function () { if (crm.focus) crm.focus(); }, 30);
+    function root() {
+      D.clear(m.body);
+      m.body.appendChild(h('p', { class: 'muted small' }, t('lp.choose_sub')));
+      m.body.appendChild(h('div', { class: 'lp-picks' },
+        tile('cap_customers', t('lp.prod_crm_name'), t('lp.choose_crm_note'),
+          function () { m.close(true); onPick({ app: 'crm' }); }),
+        tile('cap_talent', t('lp.prod_ta_name'), t('lp.choose_ta_note'), talent)));
+      focusFirst();
+    }
+
+    function talent() {
+      D.clear(m.body);
+      m.body.appendChild(h('p', { class: 'muted small' }, t('lp.ta_pick_sub')));
+      m.body.appendChild(h('div', { class: 'lp-picks' },
+        tile('check', t('lp.ta_manager'), t('lp.ta_manager_note'),
+          function () { m.close(true); onPick({ app: 'talent', dest: 'manager' }); }),
+        tile('user', t('lp.ta_staff'), t('lp.ta_staff_note'),
+          function () { m.close(true); onPick({ app: 'talent', dest: 'staff' }); })));
+      m.body.appendChild(h('button', { class: 'pick-back', type: 'button', on: { click: root } }, t('lp.back')));
+      focusFirst();
+    }
+
+    root();
     return m;
   }
 
@@ -173,10 +200,10 @@
     var demoMode = S.mode === 'local';
     var opened = null;
     function busy() { return opened && !opened.closed; }
-    function openLogin(app, e0) { if (busy()) return; pendingPick = app || null; opened = loginModal(rootEl, e0); }
+    function openLogin(pick, e0) { if (busy()) return; pendingPick = pick || null; opened = loginModal(rootEl, e0, pick); }
     /* زر الدخول العام يسأل أولًا عن المنصة ثم يطلب الدخول؛ وبطاقة كل
        منتج تطلب الدخول مباشرة وقد عرفنا منصتها من البطاقة نفسها. */
-    function openChoose() { if (busy()) return; opened = chooseModal(rootEl, function (app) { openLogin(app); }); }
+    function openChoose() { if (busy()) return; opened = chooseModal(rootEl, function (pick) { openLogin(pick); }); }
     function jump(id) { return function (e) { e.preventDefault(); var el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; }
 
     var top = h('div', { class: 'lh-top' },
@@ -217,9 +244,9 @@
       h('div', { class: 'lp-head' }, h('h2', null, t('lp.products_title'))),
       h('div', { class: 'lp-cards' },
         prodCard(t('lp.prod_crm_name'), t('lp.prod_crm_desc'), ['lp.prod_crm_f1', 'lp.prod_crm_f2', 'lp.prod_crm_f3'],
-          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin('crm'); } } }, t('lp.prod_enter'))),
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin({ app: 'crm' }); } } }, t('lp.prod_enter'))),
         prodCard(t('lp.prod_ta_name'), t('lp.prod_ta_desc'), ['lp.prod_ta_f1', 'lp.prod_ta_f2', 'lp.prod_ta_f3'],
-          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin('talent'); } } }, t('lp.prod_enter')))));
+          h('button', { class: 'lp-go', type: 'button', on: { click: function () { openLogin({ app: 'talent' }); } } }, t('lp.prod_enter')))));
 
     /* ---- تواصل معنا ---- */
     function contactRow(label, val) {
@@ -390,10 +417,12 @@
        واجهتها لهم عبث وتسريب لهيكل لا يخصّهم — يُحوَّلون إلى منصتهم. */
     var picked = pendingPick; pendingPick = null;
     var mine = PERMS.appOf(usr.role);
-    /* اختار منصة غير منصته: نأخذه إلى منصته ونقول له لماذا، بدل أن
-       نتركه يظن أن الدخول فشل أو أن الرابط خطأ. */
-    if (picked && picked !== mine) {
+    /* اختار منصة أو واجهة غير التي يخوّلها حسابه: نأخذه إلى ما يخصّه
+       ونقول له لماذا، بدل أن نتركه يظن أن الدخول فشل أو الرابط خطأ. */
+    if (picked && picked.app && picked.app !== mine) {
       UI.toast(t(mine === 'talent' ? 'login.sent_to_talent' : 'login.sent_to_crm'), '', 4500);
+    } else if (picked && mine === 'talent' && picked.dest && picked.dest !== PERMS.destOf(usr.role)) {
+      UI.toast(t(PERMS.destOf(usr.role) === 'manager' ? 'login.sent_to_manager' : 'login.sent_to_staff'), '', 4500);
     }
     if (mine === 'talent') { renderLaunch(D.qs('#app'), usr); return Promise.resolve(); }
     return S.refresh().then(function () { buildShell(D.qs('#app')); if (!location.hash || location.hash === '#/' || location.hash === '#') location.hash = '#/overview'; route(); });
